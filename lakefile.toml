@@ -1,0 +1,41 @@
+name = "kalman"
+version = "0.1.0"
+defaultTargets = [
+  "Kalman",
+  "Kalman.Tests.Specification",
+  "Kalman.Tests.ProofAudit",
+  "kalman_regression",
+]
+lintDriver = "lint"
+
+[leanOptions]
+autoImplicit = false
+warningAsError = true
+linter.extra = true
+linter.missingDocs = false
+
+[[require]]
+name = "mathlib"
+git = "https://github.com/leanprover-community/mathlib4"
+rev = "v4.34.1"
+
+[[require]]
+name = "flare"
+git = "https://github.com/duckki/flare-lean.git"
+rev = "55fd803a36d424ee3428e9a3085ef87b7829ee79"
+
+[[require]]
+name = "leanfmt"
+git = "https://github.com/duckki/leanfmt.git"
+rev = "65d69c8dc2dfd0aa69fd4132d48f38b7af9a57ef"
+
+[[lean_lib]]
+name = "Kalman"
+
+[[lean_exe]]
+name = "kalman_regression"
+root = "Kalman.Tests.FloatImplementations"
+
+[[lean_exe]]
+name = "lint"
+root = "Lint"
