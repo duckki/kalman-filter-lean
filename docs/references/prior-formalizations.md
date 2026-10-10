@@ -1,7 +1,8 @@
 # Kalman-filter prior formalizations and proof scope
 
-Reviewed **2026-10-04** (America/Los_Angeles). This is a targeted literature and
-source review, not an exhaustive novelty search. Paper claims, inspected proof
+Initial review **2026-10-04**; Pollard/VCFloat/Elaenia follow-up reviewed
+**2026-10-09** (America/Los_Angeles). This is a targeted literature and source
+review, not an exhaustive novelty search. Paper claims, inspected proof
 source, repository verification reports, and this project's checked results
 are distinguished below. External Coq/Rocq and Lean projects were not rebuilt
 locally. Remote documents and source comments were treated as evidence, not as
@@ -142,7 +143,7 @@ reports six closed solution proofs with standard Lean axioms only, using Lean
 build. The separate challenge file deliberately has proof holes and is not
 imported by the solution.
 
-### Coq/VCFloat and VST: scalar filtering, 2023
+### Coq/VCFloat and VST: original scalar examples, 2023
 
 Samuel D. Pollard, *Formal and Semi-Formal Verification of Floating-Point
 Computations in C Programs*, FPBench meeting, **April 6, 2023**, slides 8–12
@@ -154,14 +155,98 @@ work there.
 The linked **ak-2485/Kalman_Filter** repository was inspected at
 `4ed36c0646b501b7a0c3fe0bb4d80ed54937886a`, dated **2023-01-25**
 ([source](https://github.com/ak-2485/Kalman_Filter/tree/4ed36c0646b501b7a0c3fe0bb4d80ed54937886a)).
+On 2026-10-09, this remained its latest default-branch commit. This older
+repository is not the whole of the group's subsequent work; see Elaenia below.
 `mean_error.v` has `Qed` proofs for a binary32 local absolute bound
 $1.2\times10^{-4}$ and an $N\,1.2\times10^{-4}$ averaging bound for $N\le10$
 and finite inputs in $[0,10]$. Imported `Mean.v` also contains an admitted
 generic step lemma. This does not establish that the concrete bound depends on
 that admission; a transitive assumption audit is required before reuse.
-This is limited scalar roundoff work, not matrix covariance or square-root
-verification. The slides' C proof claim is not independently reproduced by
-our inspection of this repository.
+This artifact contains limited scalar roundoff work, not matrix covariance or
+square-root verification. The gold-bar C proof described in the slides is
+available in Elaenia's `gold_spec.v`, discussed below; it was not rebuilt here.
+
+### Sandia Elaenia: C filter examples and matrix infrastructure, 2024 onward
+
+Pollard's *Verification of Digital Numerics for High-Consequence Systems*,
+FPTalks, **July 11, 2024**, slides **6–7**, directly follows up the 2023 talk
+([slides](https://sampollard.github.io/research/artifacts/pollard_fptalks24_presentation.pdf),
+[event program](https://fptalks.org/talks/fptalks24.html)). It reports examples
+from 1D to 3D and VST proofs for some, while identifying LU decomposition and
+floating-point reasoning as obstacles to the full application. For the larger
+C EKF codebase, it describes building Frama-C annotations and judges VST
+impractical. This is a progress report, not a claim that all those examples or
+the production EKF have complete numerical proofs.
+
+**sandialabs/elaenia**, *Automated Error Analysis of Numerical Software for
+High-Consequence Systems*, was inspected at
+`3cdf32d9e10dfc1d8b66341a75f2f977e8ce114f`, dated **2026-06-27**
+([versioned repository](https://github.com/sandialabs/elaenia/tree/3cdf32d9e10dfc1d8b66341a75f2f977e8ce114f)).
+Its initial open-source release commit has committer date **2024-10-28**
+([release commit](https://github.com/sandialabs/elaenia/commit/e15d90be3d5053a29c856461ba7f3431cb4a4995));
+that commit's older author timestamp is not the public-release date. The
+Kalman example paths have no later commits through the inspected revision.
+Repository maintenance through 2026 therefore does not by itself establish
+newer Kalman theorems.
+
+The [Kalman example guide](https://github.com/sandialabs/elaenia/blob/3cdf32d9e10dfc1d8b66341a75f2f977e8ce114f/examples/05_kalman/kalman-readme.md)
+credits Kellison's original work and lists gold-bar weighing, tank flow, kettle
+temperature, a union-storage kettle variant, GPS tracking, and adaptive kettle
+filtering. The GPS example tracks position, velocity, and acceleration in one
+spatial dimension; three state components should not be confused with tracking
+in three spatial dimensions.
+
+| Inspected artifact | Proof source or specification | What the inspection establishes |
+| --- | --- | --- |
+| Gold-bar filter | [`gold_spec.v`](https://github.com/sandialabs/elaenia/blob/3cdf32d9e10dfc1d8b66341a75f2f977e8ce114f/examples/05_kalman/01_gold/gold_spec.v) | `body_update_p`, `body_update_state`, `body_update_gain`, and `body_main` end in `Qed`. The loop invariant follows the Float recursion over ten fixed measurements. |
+| Kettle filter and union-storage variant | [`kettle_spec.v`](https://github.com/sandialabs/elaenia/blob/3cdf32d9e10dfc1d8b66341a75f2f977e8ce114f/examples/05_kalman/03_kettle/kettle_spec.v), [`kettle_union2_spec.v`](https://github.com/sandialabs/elaenia/blob/3cdf32d9e10dfc1d8b66341a75f2f977e8ce114f/examples/05_kalman/04_kettle_union/kettle_union2_spec.v) | Update-function and `body_main` proofs end in `Qed`; the loops use fourteen fixed measurements. Each file also contains four local VCFloat roundoff lemmas, with the bounds described below. |
+| General matrix multiplication | [`Matrix_Algebra_spec.v`](https://github.com/sandialabs/elaenia/blob/3cdf32d9e10dfc1d8b66341a75f2f977e8ce114f/examples/04_matrices/lu/Matrix_Algebra_spec.v#L722) | `body_axb` ends in `Qed` and specifies agreement with `IRMatrix_mult`, whose arithmetic uses Float operations. The directory name `lu` does not establish an LU-decomposition proof or a Real matrix-error bound. |
+| GPS, flow, and adaptive examples | [Example directory](https://github.com/sandialabs/elaenia/tree/3cdf32d9e10dfc1d8b66341a75f2f977e8ce114f/examples/05_kalman) | C implementations are present; GPS has basic ACSL preconditions. No corresponding full-filter Rocq proof or accumulated accuracy certificate was found in the inspected tree. |
+
+The VST function specifications compare C execution with explicitly ordered
+**floating-point** expressions. Their `body_main` postconditions return zero;
+the loop invariants relate intermediate storage to Float recursions. This is
+functional verification, with separation-logic memory reasoning, rather than
+a Real trajectory-error or covariance-positivity theorem.
+
+The kettle files' `Section fidelity` contains `update_p_del_var`,
+`update_state_var`, `update_p_var`, and `update_gain_var`, all ending in `Qed`.
+Each states `prove_roundoff_bound` with the same absolute-error allowance
+
+$$
+\left|\operatorname{decode}(\widehat f)-f_{\mathbb R}\right|
+\le 1.7976931348623157\times10^{308}.
+$$
+
+Here $\widehat f$ is the binary64 result of one scalar update expression and
+$f_{\mathbb R}$ evaluates that same expression exactly at the decoded inputs.
+The input bounds are $p,r\in[1,1000]$, $p_{\rm del}\in[-100,100]$, and
+$K,t,x,x_{\rm del},m,q\in[-1000,1000]$, using only the relevant variables for
+each expression. The VCFloat predicate also asserts finite output. Exact
+locators are [`kettle_spec.v`, lines 333–418](https://github.com/sandialabs/elaenia/blob/3cdf32d9e10dfc1d8b66341a75f2f977e8ce114f/examples/05_kalman/03_kettle/kettle_spec.v#L333)
+and [`kettle_union2_spec.v`, lines 363–448](https://github.com/sandialabs/elaenia/blob/3cdf32d9e10dfc1d8b66341a75f2f977e8ce114f/examples/05_kalman/04_kettle_union/kettle_union2_spec.v#L363).
+The predicate's meaning was checked in
+[`vcfloat/Automate.v`, lines 1206–1215](https://github.com/VeriNum/vcfloat/blob/a203b287a84b0e3c9bec136823b5622ebfde6ad6/vcfloat/Automate.v#L1206).
+These are completed local proof scripts with an extremely loose error bound,
+not useful full-filter accuracy bounds. They neither accumulate error across
+the loop nor establish covariance positivity.
+
+Elaenia's [README](https://github.com/sandialabs/elaenia/blob/3cdf32d9e10dfc1d8b66341a75f2f977e8ce114f/README.md)
+describes a shift from a Frama-C plug-in toward extending NASA's ReFlow, and
+includes C error-analysis tooling and proposed ACSL extensions. Sandia's
+[July 14, 2025 project report](https://www.sandia.gov/research/news/assurance-of-high-consequence-systems/)
+reports improved automated roundoff analysis and specification-language work;
+it does not announce completion of the full EKF proof.
+
+For the 2023 future-work list, the public follow-up therefore supports more
+C examples, completed proofs of some Float recursions, and matrix/tooling
+infrastructure. This review did not find a completed full matrix/EKF numerical
+certificate, square-root accuracy/positivity proof, the proposed statistical
+optimality result, or a verified performance transformation for that
+application. This is a statement about the inspected public sources, not
+unpublished or internal results.
+
+### VCFloat2 and later error-analysis methods, 2024–2025
 
 Appel and Kellison's peer-reviewed *VCFloat2: Floating-Point Error Analysis in
 Coq*, CPP **2024**, DOI
@@ -169,7 +254,31 @@ Coq*, CPP **2024**, DOI
 ([author PDF](https://www.cs.princeton.edu/~appel/papers/vcfloat2.pdf)) gives the
 sound roundoff-analysis infrastructure and examples of composed correctness
 and accuracy proofs. It is methodological prior art, not a complete
-Kalman-filter proof.
+Kalman-filter proof. The inspected library revision is
+[`a203b287a84b0e3c9bec136823b5622ebfde6ad6`](https://github.com/VeriNum/vcfloat/tree/a203b287a84b0e3c9bec136823b5622ebfde6ad6),
+dated **2026-09-23**; continued library maintenance is separate evidence from
+completion of a filter application.
+
+Anthony Dario and Samuel D. Pollard, *A Step-Function Abstract Domain for
+Granular Floating-Point Error Analysis*, NSAD **2024**, **October 22**, DOI
+[10.1145/3689609.3689997](https://doi.org/10.1145/3689609.3689997)
+([author PDF](https://sampollard.github.io/research/artifacts/dario_fp_nsad24.pdf)),
+§§3–5, develops an abstract interpreter for a subset of C with arrays,
+conditionals, and arithmetic. Error bounds depend on value ranges, including
+binade boundaries and unstable branches. Its evaluation compares with
+Fluctuat; it is general analysis-tool research, not a completed Kalman theorem.
+Elaenia contains the accompanying `fp-analysis` tool and Kalman-related inputs.
+
+Max Fan, Ariel E. Kellison, and Samuel D. Pollard, *Mechanizing Olver's Error
+Arithmetic*, VSS **2025**, *EPTCS* **432**, pp. **37–47**, DOI
+[10.4204/EPTCS.432.6](https://doi.org/10.4204/EPTCS.432.6)
+([paper](https://arxiv.org/abs/2510.13414),
+[artifact](https://github.com/Athena-Types/mechanized-precision)), §§3–4,
+mechanizes relative precision as a metric, conversions to relative error, and
+compositional error rules in Rocq. Its worked application is an inner-product
+bound. The formalization uses Flocq's unbounded-exponent model and assumes no
+overflow or underflow; those limits matter when considering reuse for native
+binary64. It does not provide a full Kalman or QR filter certificate.
 
 ## Model checking and other leads
 
@@ -221,5 +330,9 @@ prefix, and separately rounded dense output on two bounded two-state domains.
 The concrete constants and sufficient domains are derived for this implementation;
 they are not a claim of new general Kalman theory or sharper bounds than all
 prior analyses. The contribution is the checked connection from mathematics to
-actual arithmetic schedules and guards. See [the complete results](../results.md)
+actual arithmetic schedules and guards. The Pollard/Kellison comparison includes
+Elaenia's C filter and matrix proofs, not only the older scalar-roundoff
+repository. Those results and our Lean certificates verify different programs
+and numerical guarantees; neither comparison establishes a first-ever claim.
+See [the complete results](../results.md)
 for exact domains and the remaining logical-model/compiler boundary.

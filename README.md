@@ -114,8 +114,10 @@ already proves overlapping exact covariance identities and positivity, with
 exact rational refinement; its
 [Float64 examples](https://github.com/F1uctus/kalman.v/blob/cf1c0af709b3b9d4e8da8247b0f0db05e5093c7a/theories/seqmx/inst_Float64.v)
 are fixed computations rather than general roundoff bounds.
-[Pollard's Coq/VCFloat examples](https://sampollard.github.io/research/artifacts/pollard_fpbench23_presentation.pdf)
-analyze scalar roundoff.
+[Pollard and Kellison's Coq/VCFloat work](https://sampollard.github.io/research/artifacts/pollard_fpbench23_presentation.pdf)
+includes scalar roundoff analysis;
+[Sandia's Elaenia follow-up](https://github.com/sandialabs/elaenia/tree/3cdf32d9e10dfc1d8b66341a75f2f977e8ce114f/examples/05_kalman)
+adds C filter examples and proofs of floating-point functional specifications.
 [Burkhart's Lean discriminative-filter formalization](https://github.com/burkh4rt/Discriminative-Kalman-Filter-Formalized/blob/6b91b7f967bc4523a3de9024bcb49be1aca42918/DiscriminativeKalmanFilter/Results.lean)
 concerns Gaussian identities and distributional approximation. See
 [the prior-work review](docs/references/prior-formalizations.md) for the

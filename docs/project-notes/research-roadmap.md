@@ -37,9 +37,12 @@ conditions governing strict contraction
 These are foundations to formalize or extend. Calling positivity, QR stability,
 or contraction itself a new result would misstate the contribution. The
 [prior formalization review](../references/prior-formalizations.md) also documents
-exact matrix theory, scalar roundoff proofs, and finite-model verification.
-This follow-up search did not identify a complete IEEE proof for our selected
-implementation; it is not an exhaustive novelty or priority claim.
+exact matrix theory, scalar roundoff proofs, C filter and matrix functional
+proofs, and finite-model verification. Its 2026-10-09 Pollard/Elaenia follow-up
+distinguishes those C proofs and local error-analysis lemmas from accumulated
+filter accuracy and positivity. The inspected sources do not supply the full
+certificate for our selected implementation; this is not an exhaustive
+novelty or priority claim.
 
 ## Completed principal goal: derive the full domain from original inputs
 

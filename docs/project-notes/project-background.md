@@ -109,7 +109,11 @@ Kalman filtering has earlier Maude/ITP and ACL2 formalizations, and recent
 Rocq/MathComp work already includes exact covariance positivity, Joseph-form
 equivalence, information-form identities, and gain optimality. Lean work also
 exists for discriminative Kalman filtering. Their assumptions and numerical
-scope differ substantially. The dated, versioned review is in
+scope differ substantially. The 2026-10-09 follow-up also inspected Sandia's
+Elaenia C filter and matrix proofs, alongside later VCFloat/error-analysis
+research; this work extends beyond the original scalar example. Its local
+kettle roundoff bounds are extremely loose and do not establish full-filter
+accuracy or covariance positivity. The dated, versioned review is in
 [prior-formalizations.md](../references/prior-formalizations.md).
 
 The completed Real theorems in this repository are known exact linear-algebra
