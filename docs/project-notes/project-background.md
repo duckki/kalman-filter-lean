@@ -107,9 +107,13 @@ Two qualifications are necessary: its statement that Joseph form does not degrad
 
 Kalman filtering has earlier Maude/ITP and ACL2 formalizations, and recent
 Rocq/MathComp work already includes exact covariance positivity, Joseph-form
-equivalence, information-form identities, and gain optimality. Lean work also
-exists for discriminative Kalman filtering. Their assumptions and numerical
-scope differ substantially. The 2026-10-09 follow-up also inspected Sandia's
+equivalence, information-form identities, and gain optimality. Burkhart's Lean
+discriminative-filter development proves six Appendix B results from the 2020
+paper, including asymptotic L¹ posterior accuracy and eventual Gaussian validity.
+Its exact commit was registered with Palomar on 2026-10-01. These are statistical
+approximation results, complementary to our concrete native roundoff bounds;
+the review records their concentration assumptions and scope. The 2026-10-09
+follow-up also inspected Sandia's
 Elaenia C filter and matrix proofs, alongside later VCFloat/error-analysis
 research; this work extends beyond the original scalar example. Its local
 kettle roundoff bounds are extremely loose and do not establish full-filter

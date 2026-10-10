@@ -1,8 +1,8 @@
 # Kalman-filter prior formalizations and proof scope
 
-Initial review **2026-10-04**; Pollard/VCFloat/Elaenia follow-up reviewed
-**2026-10-09** (America/Los_Angeles). This is a targeted literature and source
-review, not an exhaustive novelty search. Paper claims, inspected proof
+Initial review **2026-10-04**; Pollard/VCFloat/Elaenia and Burkhart/DKF follow-ups
+reviewed **2026-10-09** (America/Los_Angeles). This is a targeted literature and
+source review, not an exhaustive novelty search. Paper claims, inspected proof
 source, repository verification reports, and this project's checked results
 are distinguished below. External Coq/Rocq and Lean projects were not rebuilt
 locally. Remote documents and source comments were treated as evidence, not as
@@ -121,27 +121,122 @@ audits. [Upstream CI](https://github.com/F1uctus/kalman.v/actions/runs/332582493
 reports success at this commit; we did not independently rebuild or audit
 transitive assumptions. README lists no related publication.
 
-### Lean/Mathlib: discriminative Kalman filtering, September 2026
+### Lean/Mathlib: discriminative Kalman filtering, September–October 2026
 
 Michael C. Burkhart, **Discriminative-Kalman-Filter-Formalized**. Inspected
 commit `6b91b7f967bc4523a3de9024bcb49be1aca42918`, dated **2026-09-30**
 ([versioned repository](https://github.com/burkh4rt/Discriminative-Kalman-Filter-Formalized/tree/6b91b7f967bc4523a3de9024bcb49be1aca42918)).
 
-Its [Results.lean](https://github.com/burkh4rt/Discriminative-Kalman-Filter-Formalized/blob/6b91b7f967bc4523a3de9024bcb49be1aca42918/DiscriminativeKalmanFilter/Results.lean)
-exports Theorem 2, Lemma 1, and Remarks 1–4 from Appendix B of Burkhart et al.,
-*Neural Computation* **32** (2020), 969–1017,
+The source paper is Michael C. Burkhart, David M. Brandman, Brian Franco,
+Leigh R. Hochberg, and Matthew T. Harrison, *The Discriminative Kalman Filter
+for Bayesian Filtering with Nonlinear and Nongaussian Observation Models*,
+*Neural Computation* **32**(5) (2020), 969–1017,
 [DOI 10.1162/neco_a_01275](https://doi.org/10.1162/neco_a_01275).
-These concern Gaussian update identities, density approximation, and weak/L¹
-limits for a discriminative Bayesian filter. This is a different filter and
-a different notion of approximation error from IEEE roundoff.
+A [free author-hosted published PDF](https://burkh4rt.github.io/pubs/Burkhart-et-al-2020-Neural-Comput.pdf)
+is available; the [author manuscript](https://pmc.ncbi.nlm.nih.gov/articles/PMC8259355/)
+is another access route. Page references below use the 49-page published PDF.
 
-The source's `ValidStep` includes posterior PD as a condition for a single
-update; eventual validity is among the limiting results. It is not a proof
-that our conventional or QR implementation always returns PD. The repository
-reports six closed solution proofs with standard Lean axioms only, using Lean
-4.35.0-rc2; we inspected statements and its audit report, not an independent
-build. The separate challenge file deliberately has proof holes and is not
-imported by the solution.
+#### Algorithm and source locations
+
+DKF uses stationary linear Gaussian state dynamics, with transition $A$,
+process covariance $\Gamma$, and stationary covariance
+$S=ASA^T+\Gamma$. It approximates the state distribution conditioned on an
+observation by $p(Z_t\mid X_t)\approx\mathcal N(f(X_t),Q(X_t))$.
+The observation model can be nonlinear and non-Gaussian. Equation (2.7),
+printed p. 974 (PDF p. 6), gives
+
+$$
+\begin{aligned}
+\nu_t &= A\mu_{t-1},\\
+M_t &= A\Sigma_{t-1}A^T+\Gamma,\\
+\Sigma_t &= \bigl(M_t^{-1}+Q(X_t)^{-1}-S^{-1}\bigr)^{-1},\\
+\mu_t &= \Sigma_t\bigl(M_t^{-1}\nu_t+Q(X_t)^{-1}f(X_t)\bigr).
+\end{aligned}
+$$
+
+The stationary-prior subtraction avoids counting that prior twice. The robust
+variant, equation (2.8), printed p. 976 (PDF p. 8), omits $-S^{-1}$ from the
+precision. Here $Q(X_t)$ is conditional state covariance and $S$ is stationary
+covariance; these differ from this project's process covariance $Q$ and
+innovation covariance $S$. Neither DKF variant is implemented in this repository.
+
+#### Six completed Lean results
+
+The public [Results.lean](https://github.com/burkh4rt/Discriminative-Kalman-Filter-Formalized/blob/6b91b7f967bc4523a3de9024bcb49be1aca42918/DiscriminativeKalmanFilter/Results.lean)
+exports the following Appendix B statements in arbitrary positive finite state
+dimension. All computations in these statements are over Real numbers and
+probability measures.
+
+| Declaration | Published location | Verified result |
+| --- | --- | --- |
+| `theorem2` | Theorem 2, p. 1003 (PDF p. 35) | Under A1–A5, the supplied Gaussian approximants have the stated weak limits; their normalized update is eventually a valid Gaussian, concentrates at the limiting state, and has L¹ error tending to zero against the exact update. |
+| `lemma1` | Lemma 1, pp. 1007–1010 | Proves the pointwise Gaussian update formula when the precision is valid, and derives eventual validity and concentration from weak convergence of the input Gaussian sequences. |
+| `remark1` | Remark 1, p. 1003 | Identifies L¹ distance with the total variation **norm** of the difference of the associated measures. Under the probability-distance convention $\sup_B\lvert\mu(B)-\nu(B)\rvert$, the distance is half that norm. |
+| `remark2` | Remark 2, p. 1003 | The posterior limits hold for every supplied pair of Gaussian approximants satisfying the hypotheses, rather than merely for some choice. |
+| `remark3` | Remark 3, p. 1004 (PDF p. 36) | The robust update is a valid Gaussian at every index. Eventually its error satisfies the three-term bound (B.2); all three terms and the total L¹ error tend to zero. |
+| `remark4` | Remark 4, p. 1004 | With random inputs and explicit measurability assumptions, the conclusions hold in probability and update-validity probability tends to one. |
+
+For Theorem 2, $s_n,u_n$ are exact input densities and $s'_n,u'_n$ are their
+Gaussian approximants. The exact posterior is the normalized density
+$p_n=\operatorname{normalize}(u_n\,\tau s_n/p)$, where $\tau$ is Gaussian
+prediction and $p$ is the stationary density. Exact updates must be valid at
+every index. A1–A5 require: $s_n$ converges weakly to a probability measure;
+the prior approximation error tends to zero in L¹; $u_n$ concentrates at a
+state $b$; its Gaussian approximation error tends to zero in L¹; and the
+**exact posterior $p_n$ also concentrates at $b$**. The theorem then proves
+$\lVert p_n-p'_n\rVert_1\to0$. Exact posterior concentration is retained as a
+hypothesis, not derived solely from observation concentration.
+
+The single-step `ValidStep` condition includes posterior PD. Lemma 1 separately
+**proves eventual PD** under its limiting assumptions; it does not assume
+validity at every index. For the standard DKF, arbitrary learned positive-definite
+$Q(X_t)$ alone is insufficient to ensure PD after subtracting $S^{-1}$.
+The robust variant's positive precision sum supplies Gaussian validity at every
+index for the Gaussian inputs in the theorem.
+
+#### Scope, verification, and comparison
+
+The paper's main-text Theorem 1, printed p. 975 (PDF p. 7), connects posterior
+consistency at each fixed filtering time to increasingly informative,
+higher-dimensional observations. The Lean development formalizes the Appendix B
+sequence results. It does not formalize observation-model Bernstein–von Mises
+conditions, conditional-density existence, or the induction over filtering time
+used to reach Theorem 1. The limit is not a claim that errors vanish as filter
+time increases. There is no finite-data convergence rate or native Float
+roundoff certificate. See the versioned
+[statement read-back](https://github.com/burkh4rt/Discriminative-Kalman-Filter-Formalized/blob/6b91b7f967bc4523a3de9024bcb49be1aca42918/READBACK.md)
+and [formalization metadata](https://github.com/burkh4rt/Discriminative-Kalman-Filter-Formalized/blob/6b91b7f967bc4523a3de9024bcb49be1aca42918/formalization.yaml).
+
+Palomar registered this exact commit on **2026-10-01** (the registry's UTC date), as
+**PALOMAR-2026-10-01-000006**, version 1. Its
+[registry record](https://data.palomar-registry.org/entries/PALOMAR-2026-10-01-000006-v1.json)
+lists all six declarations and verification with NanoDa and con-ron;
+the [verification run](https://github.com/PalomarRegistry/PalomarSubmission/actions/runs/36780042299)
+is linked there. The repository's September 30 README says nothing has been
+submitted; that statement predates the registration. The recorded toolchain is
+Lean **4.35.0-rc2**, with Mathlib
+`065356127b1dc0016f66b7283ce0ce2c4055aa55`. Source inspection covered the 41
+non-challenge Lean files and the axiom report, which lists only `propext`,
+`Classical.choice`, and `Quot.sound` for the six results. We did not rebuild
+the project locally. The separate challenge file deliberately has theorem
+holes and is not imported by the solution.
+
+The formalization also repairs intermediate steps in the paper proof: full
+quadratic completion avoids assuming $U^{-1}-S^{-1}$ is positive definite, and
+the inverse-limit argument avoids inverting the potentially singular
+$G^{-1}-S^{-1}$, where $G$ is predicted covariance. These changes preserve the
+lemma's hypotheses and strengthen its proof justification. See the
+[Gaussian update proof](https://github.com/burkh4rt/Discriminative-Kalman-Filter-Formalized/blob/6b91b7f967bc4523a3de9024bcb49be1aca42918/DiscriminativeKalmanFilter/Proof/GaussianUpdate.lean)
+and [matrix-limit proof](https://github.com/burkh4rt/Discriminative-Kalman-Filter-Formalized/blob/6b91b7f967bc4523a3de9024bcb49be1aca42918/DiscriminativeKalmanFilter/Proof/MatrixLimits.lean).
+
+The developments are complementary: DKF certifies statistical approximation of
+posterior distributions; this repository certifies numerical discrepancy between
+a native binary64 filter and its exact Real trajectory, with concrete bounds
+and PD at every finite prefix in two operating domains. Combining learned
+observation errors, statistical approximation, and native arithmetic in one
+application is a possible future direction. The current theorems do not compose
+automatically: a shared filter specification, a common error measure, and a
+finite-precision operating domain would be needed.
 
 ### Coq/VCFloat and VST: original scalar examples, 2023
 

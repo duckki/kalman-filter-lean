@@ -40,7 +40,11 @@ or contraction itself a new result would misstate the contribution. The
 exact matrix theory, scalar roundoff proofs, C filter and matrix functional
 proofs, and finite-model verification. Its 2026-10-09 Pollard/Elaenia follow-up
 distinguishes those C proofs and local error-analysis lemmas from accumulated
-filter accuracy and positivity. The inspected sources do not supply the full
+filter accuracy and positivity. The same day's Burkhart/DKF follow-up records
+six Lean proofs of statistical approximation and Gaussian validity from the
+2020 paper's Appendix B, registered with Palomar on 2026-10-01. This complements
+native numerical analysis and suggests a connected statistical/numerical case
+study below. The inspected sources do not supply the full
 certificate for our selected implementation; this is not an exhaustive
 novelty or priority claim.
 
@@ -265,6 +269,15 @@ See [the complete horizon statement](../results.md#full-filter-over-a-finite-hor
 | Certified runtime error budgets | A checked certificate accepts only when covariance/gain/mean error is below requested tolerances; otherwise it reports that certification failed. Prove soundness of both the numerical enclosures and the arithmetic used to calculate their bounds. | Converts conditional profiles into evidence obtainable for actual runs; may be less conservative than one global input bound. It certifies numerical discrepancy, not the correctness of a physical noise model. |
 | Long-run stability | On a proved invariant operating domain, establish a strict contraction factor q < 1 and a uniform local error δ, then prove E_t ≤ q^t E_0 + δ(1-q^t)/(1-q), in a specified metric. | Answers whether rounding error stays bounded indefinitely. Exact contraction is known; obtaining useful constants, a preserved domain, and a complete native bridge is the substantive goal. Covariance contraction alone does not prove the analogous mean bound. |
 | Certified precision or algorithm selection | A policy chooses an implementation or precision using sound error/conditioning certificates, and every accepted choice meets the same tolerance. If repair is used, include its covariance perturbation in the budget. | Produces a decision rule rather than a claim that square-root/Joseph is always more accurate. A new policy or materially sharper bound could be numerical research, subject to a dedicated novelty review. |
+| Learned observation model and numerical filtering | Connect a learned conditional Gaussian model, a statistical posterior-approximation guarantee, and a verified native filter through one specification and a common error measure. | Builds a larger application around complementary statistical and arithmetic proofs. Burkhart's DKF results provide a starting point, but finite-data model error and native operating conditions still need proofs. |
+
+The [DKF review](../references/prior-formalizations.md#leanmathlib-discriminative-kalman-filtering-septemberoctober-2026)
+records the accessible paper, six theorem statements, and Palomar verification.
+Its asymptotic concentration can drive conditional covariance toward zero;
+our present native bounds use fixed positive covariance margins. A combined
+result would need a finite-data domain with quantitative conditioning bounds
+and would analyze the selected DKF variant's arithmetic separately. It is a
+proposed case study, not a completed theorem or a committed project.
 
 Runtime certification has prior art in validated numerics and interval filtering;
 for example, the publisher describes
