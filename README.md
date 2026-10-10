@@ -13,11 +13,11 @@ $H$ the observation matrix, and $Q,R$ the process and measurement covariances.
 The Real-valued specification is
 
 $$
-\begin{aligned}
-x^- &= Fx, & P^- &= FPF^T+Q,\\
-y &= z-Hx^-, & S &= HP^-H^T+R,\\
-K &= P^-H^TS^{-1}, & x^+ &= x^-+Ky.
-\end{aligned}
+\begin{array}{ll}
+x^- = Fx, & \qquad P^- = FPF^T+Q,\\
+y = z-Hx^-, & \qquad S = HP^-H^T+R,\\
+K = P^-H^TS^{-1}, & \qquad x^+ = x^-+Ky.
+\end{array}
 $$
 
 The posterior expressions
