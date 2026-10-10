@@ -87,22 +87,47 @@ input domains, exact constants, positivity floors, and completed theorem interfa
 
 ## Contribution and scope
 
-**Kalman theory:** The equations and general stability principles are established.
-The project does not claim a new general Kalman result.
+The main contribution is a **formally checked numerical certificate for a
+specific implementation of a classical filter**. The exact identities,
+positivity principles, and advantages of square-root filtering are established
+Kalman theory.
 
-**Numerical analysis:** Concrete bounds and sufficient operating conditions are
-derived for this program, including covariance error changing the gain and then
-the mean, initialization error, and rounded dense conversion.
+### Numerical analysis
 
-**Formal verification:** The contribution is the complete checked connection
-from exact mathematics to the specified native operation order and guards.
-There are no admitted proofs or added project axioms. FLARE supplies the recorded
-binary64 foundation; the proofs concern Lean's logical `Float` semantics.
+**What the papers already establish:** Verhaegen and Van Dooren (1986),
+Theorem 1 and recurrences (57)–(59), analyze local roundoff and its accumulation,
+including covariance, gain, and state-estimate errors. Their analysis uses
+first-order perturbations. Tracy (2022), §3 and Algorithm 1, derives the QR
+square-root formulation used here.
+([Numerical analysis paper](https://perso.uclouvain.be/paul.vandooren/publications/VerhaegenV86.pdf),
+[QR algorithm paper](https://arxiv.org/pdf/2208.06452v1).)
+
+**What we certify:** We instantiate established roundoff analysis for this
+binary64 program and certify its concrete error bounds in Lean on two operating
+domains.
+
+### Formal verification
+
+**What earlier formalizations cover:** The inspected
+[Rocq/MathComp development](https://github.com/F1uctus/kalman.v/blob/cf1c0af709b3b9d4e8da8247b0f0db05e5093c7a/theories/kalman.v)
+already proves overlapping exact covariance identities and positivity, with
+exact rational refinement; its
+[Float64 examples](https://github.com/F1uctus/kalman.v/blob/cf1c0af709b3b9d4e8da8247b0f0db05e5093c7a/theories/seqmx/inst_Float64.v)
+are fixed computations rather than general roundoff bounds.
+[Pollard's Coq/VCFloat examples](https://sampollard.github.io/research/artifacts/pollard_fpbench23_presentation.pdf)
+analyze scalar roundoff.
+[Burkhart's Lean discriminative-filter formalization](https://github.com/burkh4rt/Discriminative-Kalman-Filter-Formalized/blob/6b91b7f967bc4523a3de9024bcb49be1aca42918/DiscriminativeKalmanFilter/Results.lean)
+concerns Gaussian identities and distributional approximation. See
+[the prior-work review](docs/references/prior-formalizations.md) for the
+versioned sources, theorem locations, and trust scopes.
+
+**What this development adds:** A complete Lean proof connecting the executable
+QR filter to its Real specification, including accumulated accuracy and
+covariance positivity. Relative to the reviewed work, the added value is this
+implementation-specific binary64 certificate.
 
 The complete native filter domains are bounded two-state families. Wider
-dimensions and dynamics require further analysis. These are roundoff guarantees
-against the ideal filter, with physical model adequacy, statistical consistency,
-and compiler/hardware refinement outside their scope.
+dimensions and dynamics require further analysis.
 
 ## Build and validation
 
