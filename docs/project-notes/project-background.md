@@ -62,7 +62,7 @@ Three different objects must remain distinct:
 | Object | Meaning of positivity |
 | --- | --- |
 | Exact reference $P_k$ | A theorem about matrices over `Real`. |
-| Stored finite floating-point factor $\widehat L_k$ | Decode its entries exactly into reals, then define $\widetilde P_k = \operatorname{decode}(\widehat L_k)\operatorname{decode}(\widehat L_k)^T$. This matrix is PSD; it is PD if the factor is nonsingular. |
+| Stored finite floating-point factor $\widehat L_k$ | Decode its entries exactly into reals, then define $\widetilde P_k = \mathrm{decode}(\widehat L_k)\mathrm{decode}(\widehat L_k)^T$. This matrix is PSD; it is PD if the factor is nonsingular. |
 | Materialized floating-point covariance $\widehat P_k = \mathrm{fl}(\widehat L_k\widehat L_k^T)$ | A separate rounded computation. Its decoded result needs its own symmetry and positivity analysis. |
 
 Thus “always positive definite” means **for every supported execution satisfying stated input, range, conditioning, and precision hypotheses**. Factor storage alone gives PSD of the represented covariance; it does not prove nonsingularity or a small error relative to the exact recursion. These distinctions follow from the quadratic-form identities and are reflected in Mathlib's definitions [F1].

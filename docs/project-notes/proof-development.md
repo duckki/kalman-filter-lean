@@ -210,7 +210,7 @@ and zero-write error are conclusions.
 Let $x_i$ decode the same stored source column, $s$ the selected stored scale,
 $\alpha$ the stored signed norm choice, and $w$ the returned stored reflector.
 The finish helper computes the checked native product
-$d=\operatorname{fl}(\alpha s)$, writes it at $f$, and writes **positive zero** at
+$d=\mathrm{fl}(\alpha s)$, writes it at $f$, and writes **positive zero** at
 all tail indices. It does not compute those residuals and discover them to be
 zero. The completed conclusions include finite output, unchanged storage size,
 exact preservation of every unvisited Float value, and
@@ -339,7 +339,7 @@ $Z_{ij}=X_{ij}-2u_i\sum_{r\in I}u_rX_{rj}$,
 
 $$
 |\widehat X_{ij}-Z_{ij}|\le
-\operatorname{iterationRadius}(k,M)
+\mathrm{iterationRadius}(k,M)
 =\left(\max\{2^{-49}+c_k+6kr_k,\ (k+1)2^{-42}\}+6kr_k\right)M\le2^{-17}M.
 $$
 
@@ -390,7 +390,7 @@ value, including signed zero, subnormals and the largest finite magnitude.
 Let $U$ be the upper triangle of the retained square block of the stored QR
 result, decoded exactly and set to zero below its diagonal. Put
 $d_j=-1$ when the decoded diagonal is negative and $d_j=1$ otherwise, and
-$D=\operatorname{diag}(d)$. The theorem produces a successful, finite output
+$D=\mathrm{diag}(d)$. The theorem produces a successful, finite output
 of size $n^2$, with assigned positive zeros above its diagonal and
 
 $$
@@ -547,7 +547,7 @@ The previous selected-panel bound extends to
 
 $$
 |B_{ij}-C_{ij}|\le e_k(M),\qquad
- e_k(M)=\operatorname{iterationRadius}(k,M)\le2^{-17}M.
+ e_k(M)=\mathrm{iterationRadius}(k,M)\le2^{-17}M.
 $$
 
 Prefix rows are copied by the native loop and unchanged by the reference.
@@ -793,7 +793,7 @@ For $w\le h\le8$, remaining Gram floor $M^2/16$ and $M>0$,
 
 $$
 \exists i,\quad p\le i<h,\qquad
-\left|\operatorname{value}(\operatorname{entry}(w,\mathrm{current},i,p))\right|
+\left|\mathrm{value}(\mathrm{entry}(w,\mathrm{current},i,p))\right|
  \ge M/16.
 $$
 
@@ -809,7 +809,7 @@ predicate:
 
 $$
 \exists i,\quad p\le i<h,\qquad
-\left|\operatorname{value}(\operatorname{entry}(w,\mathrm{current},i,p))\right|
+\left|\mathrm{value}(\mathrm{entry}(w,\mathrm{current},i,p))\right|
  \ge2^{-900}.
 $$
 

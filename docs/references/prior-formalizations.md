@@ -178,7 +178,7 @@ probability measures.
 
 For Theorem 2, $s_n,u_n$ are exact input densities and $s'_n,u'_n$ are their
 Gaussian approximants. The exact posterior is the normalized density
-$p_n=\operatorname{normalize}(u_n\,\tau s_n/p)$, where $\tau$ is Gaussian
+$p_n=\mathrm{normalize}(u_n\,\tau s_n/p)$, where $\tau$ is Gaussian
 prediction and $p$ is the stationary density. Exact updates must be valid at
 every index. A1–A5 require: $s_n$ converges weakly to a probability measure;
 the prior approximation error tends to zero in L¹; $u_n$ concentrates at a
@@ -309,7 +309,7 @@ The kettle files' `Section fidelity` contains `update_p_del_var`,
 Each states `prove_roundoff_bound` with the same absolute-error allowance
 
 $$
-\left|\operatorname{decode}(\widehat f)-f_{\mathbb R}\right|
+\left|\mathrm{decode}(\widehat f)-f_{\mathbb R}\right|
 \le 1.7976931348623157\times10^{308}.
 $$
 

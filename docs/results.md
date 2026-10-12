@@ -17,7 +17,7 @@ an intermediate rounded state.
 Three covariance objects are kept distinct:
 
 - $P_t$: the independently propagated ideal Real covariance.
-- $C_t^{\mathrm{factor}}=\operatorname{decode}(L_t)\operatorname{decode}(L_t)^T$:
+- $C_t^{\mathrm{factor}}=\mathrm{decode}(L_t)\mathrm{decode}(L_t)^T$:
   the exact covariance denoted by the retained native factor.
 - $C_t^{\mathrm{dense}}$: exact decoding of the separately rounded native
   multiplication used to return a dense covariance.
@@ -188,7 +188,7 @@ changing their domains or numerical bounds.
 | Proof witness (in `Kalman.Proofs`) | Conclusion and domain |
 | --- | --- |
 | `RealDiagonalObservation.predict_eq` / `gain_eq` / `update_eq` / `step_eq` | Fully observed diagonal scalar formulas equal the existing matrix specification; all covariance forms covered and inverses justified |
-| `RealObservableInvariant.prediction_invariant` / `update_invariant` / `step_invariant` | Real full-observation diagonal domain with `|f|≤1`: prediction variance `[1,3]`, posterior variance `[1/2,1]`, mean cap `1` |
+| `RealObservableInvariant.prediction_invariant` / `update_invariant` / `step_invariant` | Real full-observation diagonal domain with $\lvert f\rvert\le1$: prediction variance `[1,3]`, posterior variance `[1/2,1]`, mean cap `1` |
 | `RealObservableInvariant.run_invariant` / `horizon_covariance_floor` / `identity_domain_nonempty` | Every Real prefix preserves the invariant and covariance floor `1/2`; identity dynamics inhabit the domain. These are Real theorems |
 | `RealObservableSensitivity.gain_difference` / `covariance_difference` / `mean_difference` | Exact rational perturbation identities, including the covariance-dependent gain's contribution to mean error |
 | `RealObservableSensitivity.step_sensitivity` | Real fully observed diagonal step: covariance error `≤ (9/25)eP`, mean error `≤ (3/5)eX + (1/2)eP`; nonnegative actual diagonal covariance, bounded reference and common model/measurement |
@@ -198,7 +198,7 @@ changing their domains or numerical bounds.
 | `FloatDiagonalStorage.gram_diagonal` | Exact Real Gram of a decoded diagonal factor equals the diagonal matrix of its squared diagonal entries; no rounded dense product |
 | `FloatQRDiagonal.triangularize_disjoint_two` / `gramFactor_diagonal_two` | Actual successful QR of finite disjoint-support 4×2 columns retains decoded R₀₁ zero; signed retention of two diagonal 2×2 blocks returns a diagonal factor, without a magnitude cap |
 | `FloatObservableDiagonal.prediction_innovation_diagonal` / `innovation_accuracy_diagonal` | Original local domains plus a diagonal incoming factor derive successful diagonal prediction/innovation, exact diagonal Real Grams, and the existing local errors/floors; no full correction or horizon claim |
-| `FloatObservablePrediction.prediction_profile` / `prearray_domain` | Local stored domain with diagonal `|f|≤1` derives every prediction profile; actual prearray floor `63/64`, row energy cap `51/16`, QR budget `21/8` |
+| `FloatObservablePrediction.prediction_profile` / `prearray_domain` | Local stored domain with diagonal $\lvert f\rvert\le1$ derives every prediction profile; actual prearray floor `63/64`, row energy cap `51/16`, QR budget `21/8` |
 | `FloatObservablePrediction.prediction_accuracy` / `prediction_innovation_domain` | Native prediction success/valid factor, covariance/mean errors `2⁻²⁴` / `2⁻⁴⁶` against exact local prediction, mean/factor caps `19/16` / `2`, covariance diagonal cap `13/4`, floor `15/16`, and reached innovation domain |
 | `FloatObservablePrediction.identity_domain_nonempty` | Native identity-transition/observation inputs inhabit the original local domains; no full correction or horizon conclusion |
 | `FloatObservableInnovation.prearray_domain` / `factor_accuracy` | Full-observation HL/R/innovation QR succeed; original-R-plus-stored-P error `2⁻²³`, exact retained floor `29/16`, covariance diagonal cap `39/8`, factor entry cap `9/4` |
@@ -305,7 +305,7 @@ the Joseph statement concerns its covariance kernel with a supplied gain.
 | `choleskyDiagonalAccuracy` | $\lvert d^2-p_0\rvert \le c_k$ for the computed diagonal; both pivot checks succeed | Residual profile for the diagonal row and strict exact residual margin $e_k<p_0$ |
 | `choleskyGramAccuracy` | $\lvert (LL^T-A)_{ij}\rvert \le c_n+r_n$ for the actual returned factor | Successful native run, symmetric finite input, correct storage, and `FactorProfile`; diagonal floor and quotient domain as below |
 | `choleskySolveAccuracy` | $\lvert X_{ij}-((LL^T)^{-1}B)_{ij}\rvert \le n(1+nD)r_n/\alpha$ | `SolveProfile` for both successful passes; correct finite storage; $(LL^T-\alpha I)\succeq0$, $\alpha>0$; reference is the stored factor's exact Gram |
-| `ldlSolveAccuracy` | Solution error in column $j$ at most $\frac{n}{3/16}\sum_i\operatorname{residualBound}(i,j)$; execution succeeds with finite output | $n\le12$, stored coefficient magnitude $\le1024$, $(A-\frac3{16}I)\succeq0$, finite correctly shaped arrays, RHS magnitude $\le2^B$ for $0\le B\le512$ |
+| `ldlSolveAccuracy` | Solution error in column $j$ at most $\frac{n}{3/16}\sum_i\mathrm{residualBound}(i,j)$; execution succeeds with finite output | $n\le12$, stored coefficient magnitude $\le1024$, $(A-\frac3{16}I)\succeq0$, finite correctly shaped arrays, RHS magnitude $\le2^B$ for $0\le B\le512$ |
 | `josephCovarianceAccuracy` | $\lvert \widehat J_{ij}-J(P,H,R,K)_{ij}\rvert \le e_J$; all five products and both sums are covered | `JosephProfile` records successful computations and operand budgets; $e_J$ is the public `Proofs.ArithmeticProfiles.josephRadius`; reference uses the same stored gain, with separate entry bounds on $P,I-KH,K$ |
 | `qrGramFactorInitialAccuracy` | Execution succeeds with finite lower-positive $L$; exact $LL^T\succeq(M^2/16)I$ is PD; $\lvert(LL^T-AA^T)_{ij}\rvert\le G_{d,n}(M)\le M^2/128$ | Original finite $n\times d$ array, $n\le d\le8$, $2^{-896}\le M\le2^{900}$, row energies $\le M^2/2$, $AA^T\succeq(M^2/8)I$; no run or intermediate profile assumption |
 | `factorMaterializationAccuracy` | Dense $LL^T$ formation error at most $n2^{-50}M$; checked output is valid | Valid retained factor, $1\le n\le32$, finite storage, Gram dot-product mass $\le M$, $2^{-1022}\le M\le2^{990}$ |
@@ -347,12 +347,12 @@ $2^{-1200}$, yet its rounded dense materialization is zero.
 of the actual ascending dot-product loop with separately rounded products/sums.
 For an inner dimension $k\le32$, let
 
-$$M_{ij}\ \ge\ \sum_{t=0}^{k-1}|\operatorname{decode}(a_{it})\operatorname{decode}(b_{tj})|,
+$$M_{ij}\ \ge\ \sum_{t=0}^{k-1}|\mathrm{decode}(a_{it})\mathrm{decode}(b_{tj})|,
 \qquad 2^{-1022}\le M_{ij}\le2^{990}.$$
 
 For finite operands, its entrywise error is
 
-$$|\operatorname{decode}(\widehat C_{ij})-(AB)_{ij}|
+$$|\mathrm{decode}(\widehat C_{ij})-(AB)_{ij}|
 \ \le\ k\,2^{-50}M_{ij}.$$
 
 The lower allowance includes gradual underflow; there is no assumption that
@@ -373,7 +373,7 @@ floor $(A-\frac3{16}I)\succeq0$, and right-hand-side magnitude at most $2^B$ wit
 $0\le B\le512$. For the actual factors and substitution arrays, the error in
 column $j$ is at most
 
-$$\frac{n}{3/16}\sum_i\operatorname{residualBound}(i,j).$$
+$$\frac{n}{3/16}\sum_i\mathrm{residualBound}(i,j).$$
 
 `residualBound` is FLARE's explicit arithmetic allowance computed mathematically
 from the actual intermediate magnitudes, not an assumed solution-error bound.
@@ -712,7 +712,7 @@ cap are exported in the conclusion. With $k_p=d-p$,
 $$
 G_{d,n}(M)=\sum_{p=0}^{n-1}
 k_p\left[2(1+2k_p)M e_{k_p}(M)+e_{k_p}(M)^2\right],\qquad
-e_k(M)=\operatorname{iterationRadius}(k,M).
+e_k(M)=\mathrm{iterationRadius}(k,M).
 $$
 
 `FloatQRInitialDomain.iterationProfile_of_previous` assembles all next-pivot
@@ -1309,12 +1309,12 @@ against a reference bounded by $B$ to Gram error $d(2eB+e^2)$ for $d$ columns.
 `FloatSquareRootError.prediction_accuracy` covers the entire existing
 `predictUnchecked` stage: process-noise Cholesky, rounded $FL$, prearray copying,
 QR, and the mean product. It proves success and a valid returned factor. With
-$e=\operatorname{productRadius}(n,M_{FL})$, its absolute covariance allowance is
+$e=\mathrm{productRadius}(n,M_{FL})$, its absolute covariance allowance is
 
 $$
 G_{2n,n}(M_{QR})+n\bigl(2e\,nB_FB_L+e^2\bigr)
-+\operatorname{diagonalRadius}(n,M_Q)
-+\operatorname{divisionRadius}(n,M_Q,\delta_Q,D_Q).
++\mathrm{diagonalRadius}(n,M_Q)
++\mathrm{divisionRadius}(n,M_Q,\delta_Q,D_Q).
 $$
 
 The mean allowance is `productRadius n meanMass`. Both comparisons use exact prediction
@@ -1357,7 +1357,7 @@ floor $\alpha>0$, the gain allowance is
 
 $$
 e_K=\frac{m}{\alpha}\left[(1+mD_S)
-\operatorname{divisionRadius}(m,M_S,\delta_S,D_S)
+\mathrm{divisionRadius}(m,M_S,\delta_S,D_S)
 +e_C+nB_Le_{HL}+mB_{\widehat K}e_I\right].
 $$
 
@@ -1366,11 +1366,11 @@ and numerator discrepancies. It does not assume an exact computed gain. The
 floor is transferred from the original measurement noise through the exact
 innovation covariance; no inverse of a perturbed innovation is silently used.
 
-Let $e_z=\operatorname{sumRadius}(E_z)+\operatorname{productRadius}(n,M_{H\mu})$,
+Let $e_z=\mathrm{sumRadius}(E_z)+\mathrm{productRadius}(n,M_{H\mu})$,
 and let $K,Z$ bound the ideal gain and residual. The mean allowance is
 
 $$
-\operatorname{sumRadius}(E_\mu)+\operatorname{productRadius}(m,M_{Kz})
+\mathrm{sumRadius}(E_\mu)+\mathrm{productRadius}(m,M_{Kz})
 +m(e_KZ+Ke_z+e_Ke_z).
 $$
 
@@ -1750,7 +1750,7 @@ model, with finiteness supplied by FLARE's nearest-subtraction theorem.
 connects a decoded diagonal factor to its exact Real covariance:
 
 $$
-P_L=LL^T=\operatorname{diag}(L_{00}^2,L_{11}^2).
+P_L=LL^T=\mathrm{diag}(L_{00}^2,L_{11}^2).
 $$
 
 This is the mathematical interpretation of the stored words. Forming a rounded
@@ -1826,7 +1826,7 @@ not an initialization or complete-filter invariant.
 | Completed conclusion | Bound / structure |
 | --- | --- |
 | Actual HL, original-R Cholesky, innovation QR and both gain solves | Succeed with finite shaped storage; all profiles derived |
-| Formed PHT $=\operatorname{fl}(L\widehat{HL}^{\,T})$ | Exactly decoded diagonal; entries bounded by $7/2$ |
+| Formed PHT $=\mathrm{fl}(L\widehat{HL}^{\,T})$ | Exactly decoded diagonal; entries bounded by $7/2$ |
 | Formed PHT discrepancy from $P_L$ | $2^{-43}$, about $1.14\times10^{-13}$ |
 | Chosen complete innovation profile radius | $9\cdot2^{-32}$, about $2.10\times10^{-9}$ |
 | Actual gain | Exactly decoded diagonal; diagonal entries in $[3/8,13/16]$ |
