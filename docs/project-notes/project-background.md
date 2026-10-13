@@ -86,10 +86,10 @@ A useful starting bound is Theorem 1, part 2, printed p. 911:
 $$
 \Delta_p \leq \epsilon_5
   \left(1+\frac{\sigma_1}{\sigma_p}\right)
-  \frac{\|P_{k+1\mid k}\|_2}{\cos\phi_1}.
+  \frac{\lVert P_{k+1\mid k}\rVert _2}{\cos\phi_1}.
 $$
 
-Here $\Delta_p$ is local covariance error; $\sigma_1,\sigma_p$ are extreme singular values of the innovation factor $R_k^{e\,1/2}$; and $\cos\phi_1=\|S_{k+1}\|_2/\|[G_k\;S_{k+1}]\|_2$. Its $S_k$ is a covariance factor, unlike this document's innovation $S_k$. The conventional bound contains $(\sigma_1/\sigma_p)^2$. The $\epsilon_i$ are precision-scale constants. This conditioning-dependent first-order analysis, including accumulation in Section III, needs explicit remainder bounds for Lean certification [R2].
+Here $\Delta_p$ is local covariance error; $\sigma_1,\sigma_p$ are extreme singular values of the innovation factor $R_k^{e\thinspace 1/2}$; and $`\cos\phi_1=\lVert S_{k+1}\rVert _2/\lVert [G_k\mspace{5mu}S_{k+1}]\rVert _2`$. Its $S_k$ is a covariance factor, unlike this document's innovation $S_k$. The conventional bound contains $(\sigma_1/\sigma_p)^2$. The $\epsilon_i$ are precision-scale constants. This conditioning-dependent first-order analysis, including accumulation in Section III, needs explicit remainder bounds for Lean certification [R2].
 
 The 1987 follow-up clarifies which conventional multiplication order exhibits the loss-of-symmetry mechanism [R3]. Accordingly, the project must specify an operation sequence, not just a formula or the label “conventional filter.”
 
@@ -149,7 +149,7 @@ $$
 The initial sufficient assumptions are $P_0^+\succ0$, $R_k\succ0$, and $Q_k\succ0$ at every prediction. They allow arbitrary, even singular, $F_k$. A later generalization can use $Q_k\succeq0$ with nonsingular $F_k$, or the weaker condition
 
 $$
-\ker(F_k^T)\cap\ker(Q_k)=\{0\}
+\ker(F_k^T)\cap\ker(Q_k)=\lbrace 0\rbrace
 $$
 
 when $P_{k-1}^+\succ0$. This condition explains exactly when prediction can lose rank. Semidefinite noise by itself does not justify strict positivity.
@@ -208,7 +208,7 @@ The following separated prediction/measurement arrangement makes the covariance 
 For prediction, with $Q=T_QT_Q^T$, triangularize
 
 $$
-A_{\mathrm{pred}}=[F L\;T_Q]
+A_{\mathrm{pred}}=[F L\mspace{5mu}T_Q]
 $$
 
 by QR of its transpose, yielding $L^-$ with $L^-(L^-)^T=A_{\mathrm{pred}}A_{\mathrm{pred}}^T$.
@@ -240,7 +240,7 @@ Tracy's QR/Joseph arrangement [R5] is the initial implemented sequence. The bloc
 Prove a QR contract for each computed prearray, including errors incurred while constructing it. One useful contract has an exactly orthogonal real matrix $U$ and perturbation $\Delta A$ such that the decoded triangular result is the exact triangularization of $A+\Delta A$, with
 
 $$
-\|\Delta A\|_2\leq\eta(A,n,m,u).
+\lVert \Delta A\rVert _2\leq\eta(A,n,m,u).
 $$
 
 The final $\eta$ must have explicit constants derived for the chosen algorithm. An assumed “stable QR” contract is a possible intermediate result, but is not completion of the floating-point implementation proof. [N1, N2] provide the numerical-analysis background.
@@ -248,15 +248,15 @@ The final $\eta$ must have explicit constants derived for the chosen algorithm. 
 For any such contract, an independently derived bridge is
 
 $$
-\|(A+\Delta A)(A+\Delta A)^T-AA^T\|_2
-\leq 2\|A\|_2\eta+\eta^2.
+\lVert (A+\Delta A)(A+\Delta A)^T-AA^T\rVert _2
+\leq 2\lVert A\rVert _2\eta+\eta^2.
 $$
 
 Prediction can use this directly. Measurement additionally needs bounds for extracting the posterior through the block factorization, including the conditioning of the innovation block. A backward error for an arbitrary perturbed prearray is not automatically a backward error for physically structured $F,H,Q,R$; that stronger claim would need a separate proof.
 
 ### Accumulation over a finite horizon
 
-Let $\mathcal R_k$ denote the exact prediction/update map from step $k$ to $k+1$, and let $\widetilde P_k$ be the covariance denoted by the computed factor. Define $E_k=\|\widetilde P_k-P_k\|_2$. Prove a local defect bound $\varepsilon_k$ relative to $\mathcal R_k(\widetilde P_k)$, and a Lipschitz bound $a_k$ for $\mathcal R_k$ on an explicit invariant domain. The proposed composition theorem is
+Let $\mathcal R_k$ denote the exact prediction/update map from step $k$ to $k+1$, and let $\widetilde P_k$ be the covariance denoted by the computed factor. Define $E_k=\lVert \widetilde P_k-P_k\rVert _2$. Prove a local defect bound $\varepsilon_k$ relative to $\mathcal R_k(\widetilde P_k)$, and a Lipschitz bound $a_k$ for $\mathcal R_k$ on an explicit invariant domain. The proposed composition theorem is
 
 $$
 E_{k+1}\leq a_kE_k+\varepsilon_k,

@@ -146,7 +146,7 @@ $$
 |\widehat y_i-y_i|\le (k+1)2^{-42}M\le2^{-36}M.
 $$
 
-For $k=32$, the sharper formula is $33\,2^{-42}M$, about
+For $k=32$, the sharper formula is $33\thinspace 2^{-42}M$, about
 $7.50\times10^{-12}M$. This is an absolute stored-operand bound, not a relative
 error bound on $y_i$; cancellation may make $y_i$ zero or very small.
 
@@ -327,8 +327,8 @@ Finishing then preserves every trailing result. Including the source column,
 
 $$
 |\widehat X_{ij}-Y_{ij}|\le
-\max\{2^{-49}+c_k+6kr_k,\ (k+1)2^{-42}\}M\le2^{-18}M,
-\qquad i\in I,\ j\in[f,w).
+\max\lbrace 2^{-49}+c_k+6kr_k,\space (k+1)2^{-42}\rbrace M\le2^{-18}M,
+\qquad i\in I,\space j\in[f,w).
 $$
 
 There is also a comparison with the exactly normalized stored constructed
@@ -340,7 +340,7 @@ $Z_{ij}=X_{ij}-2u_i\sum_{r\in I}u_rX_{rj}$,
 $$
 |\widehat X_{ij}-Z_{ij}|\le
 \mathrm{iterationRadius}(k,M)
-=\left(\max\{2^{-49}+c_k+6kr_k,\ (k+1)2^{-42}\}+6kr_k\right)M\le2^{-17}M.
+=\left(\max\lbrace 2^{-49}+c_k+6kr_k,\space (k+1)2^{-42}\rbrace +6kr_k\right)M\le2^{-17}M.
 $$
 
 The final bound adds $6kr_kM$ to the larger of the source and trailing-column allowances.
@@ -633,7 +633,7 @@ $$
 consecutive Gram comparisons with the Real triangle inequality. There is no
 additional amplification or trailing-column-count factor. Under nonnegative
 budgets bounded by $B$ and active heights at most 32, `qrGramRadius_le` supplies
-the conservative cap $G_{h,w}(M)\le w\,2^{-4}B^2$. The explicit sum is more
+the conservative cap $G_{h,w}(M)\le w\thinspace 2^{-4}B^2$. The explicit sum is more
 informative than that coarse cap. These are absolute entry bounds, not sharp
 relative or normwise Householder backward-stability constants.
 
@@ -684,7 +684,7 @@ $$
 $$
 
 Let $A_p$ decode the current stored prefix and
-$G_p=\texttt{qrGramRadius}\ h\ p\ \texttt{budget}$. The completed theorem gives
+$G_p=\texttt{qrGramRadius}\space h\space p\space \texttt{budget}$. The completed theorem gives
 
 $$
 (A_p)_{ij}^2\le S+G_p,\qquad

@@ -85,7 +85,7 @@ every mean-component difference from the independent ideal mean.
 | Domain | Retained-factor $E_P$ | Returned dense $E_P$ | $E_x$ | Returned dense floor |
 | --- | --- | --- | --- | --- |
 | Correlated stable | $2^{-25}$ | $2^{-25}+2^{-48}$ | $2^{-25}$ | $1/4-2^{-47}>0$ |
-| Fully observed diagonal | $5\,2^{-30}$ | $5\,2^{-30}+2^{-48}$ | $2^{-24}$ | $7/16-2^{-47}\ge3/8$ |
+| Fully observed diagonal | $5\thinspace 2^{-30}$ | $5\thinspace 2^{-30}+2^{-48}$ | $2^{-24}$ | $7/16-2^{-47}\ge3/8$ |
 
 These bounds hold at **every prefix of any finite horizon**, including
 initialization, and do not grow with the number of steps. No reached arithmetic
@@ -307,7 +307,7 @@ the Joseph statement concerns its covariance kernel with a supplied gain.
 | `choleskySolveAccuracy` | $\lvert X_{ij}-((LL^T)^{-1}B)_{ij}\rvert \le n(1+nD)r_n/\alpha$ | `SolveProfile` for both successful passes; correct finite storage; $(LL^T-\alpha I)\succeq0$, $\alpha>0$; reference is the stored factor's exact Gram |
 | `ldlSolveAccuracy` | Solution error in column $j$ at most $\frac{n}{3/16}\sum_i\mathrm{residualBound}(i,j)$; execution succeeds with finite output | $n\le12$, stored coefficient magnitude $\le1024$, $(A-\frac3{16}I)\succeq0$, finite correctly shaped arrays, RHS magnitude $\le2^B$ for $0\le B\le512$ |
 | `josephCovarianceAccuracy` | $\lvert \widehat J_{ij}-J(P,H,R,K)_{ij}\rvert \le e_J$; all five products and both sums are covered | `JosephProfile` records successful computations and operand budgets; $e_J$ is the public `Proofs.ArithmeticProfiles.josephRadius`; reference uses the same stored gain, with separate entry bounds on $P,I-KH,K$ |
-| `qrGramFactorInitialAccuracy` | Execution succeeds with finite lower-positive $L$; exact $LL^T\succeq(M^2/16)I$ is PD; $\lvert(LL^T-AA^T)_{ij}\rvert\le G_{d,n}(M)\le M^2/128$ | Original finite $n\times d$ array, $n\le d\le8$, $2^{-896}\le M\le2^{900}$, row energies $\le M^2/2$, $AA^T\succeq(M^2/8)I$; no run or intermediate profile assumption |
+| `qrGramFactorInitialAccuracy` | Execution succeeds with finite lower-positive $L$; exact $LL^T\succeq(M^2/16)I$ is PD; $`\lvert(LL^T-AA^T)_{ij}\rvert\le G_{d,n}(M)\le M^2/128`$ | Original finite $n\times d$ array, $n\le d\le8$, $2^{-896}\le M\le2^{900}$, row energies $\le M^2/2$, $AA^T\succeq(M^2/8)I$; no run or intermediate profile assumption |
 | `factorMaterializationAccuracy` | Dense $LL^T$ formation error at most $n2^{-50}M$; checked output is valid | Valid retained factor, $1\le n\le32$, finite storage, Gram dot-product mass $\le M$, $2^{-1022}\le M\le2^{990}$ |
 
 `FloatQRInitialDomain.gramFactor_initial_refined_accuracy` additionally proves
@@ -347,13 +347,13 @@ $2^{-1200}$, yet its rounded dense materialization is zero.
 of the actual ascending dot-product loop with separately rounded products/sums.
 For an inner dimension $k\le32$, let
 
-$$M_{ij}\ \ge\ \sum_{t=0}^{k-1}|\mathrm{decode}(a_{it})\mathrm{decode}(b_{tj})|,
+$$M_{ij}\space \ge\space \sum_{t=0}^{k-1}|\mathrm{decode}(a_{it})\mathrm{decode}(b_{tj})|,
 \qquad 2^{-1022}\le M_{ij}\le2^{990}.$$
 
 For finite operands, its entrywise error is
 
 $$|\mathrm{decode}(\widehat C_{ij})-(AB)_{ij}|
-\ \le\ k\,2^{-50}M_{ij}.$$
+\space \le\space k\thinspace 2^{-50}M_{ij}.$$
 
 The lower allowance includes gradual underflow; there is no assumption that
 every exact term is normal. The theorem is transferred from FLARE
@@ -556,8 +556,12 @@ exports the proof witnesses:
   are derived from the input operands.
 - `solve_accuracy`: if the supplied factor's exact Gram additionally satisfies
   $LL^T\succeq(1/2)I$, the actual two-pass output obeys
-  $$|\widehat X_{ij}-((LL^T)^{-1}B)_{ij}|\le2^{-37}
-      \approx7.28\times10^{-12},\qquad |\widehat X_{ij}|\le1.$$
+
+  $$
+  |\widehat X_{ij}-((LL^T)^{-1}B)_{ij}|\le2^{-37}
+  \approx7.28\times10^{-12},\qquad |\widehat X_{ij}|\le1.
+  $$
+
   The spectral floor is a conditioning premise about the stored factor, not an
   execution/error premise. The reference uses the original stored RHS values.
 - `factor_domain_of_cholesky`: every factor returned from the preceding
@@ -565,7 +569,11 @@ exports the proof witnesses:
 - `factor_and_solve_accuracy`: on that original covariance domain and the RHS
   domain above, **both factorization and solve succeed**, with finite correctly
   shaped output, and
-  $$|\widehat X_{ij}-(A^{-1}B)_{ij}|\le2^{-37},\qquad |\widehat X_{ij}|\le1.$$
+
+  $$
+  |\widehat X_{ij}-(A^{-1}B)_{ij}|\le2^{-37},\qquad |\widehat X_{ij}|\le1.
+  $$
+
   Here $A$ and $B$ decode the **original input arrays**. Cholesky error is
   included; the exact comparator is not replaced by the rounded factor's Gram.
 
@@ -576,11 +584,11 @@ per-column enclosures are $|y_0|\le1/2$, $|y_1|\le3$, $|x_1|\le7$ and
 $|x_0|\le30$. These give all row masses below $32$ and all quotient range
 conditions. The imported binary64 residual/division bounds and their native
 schedule bridge are unchanged. In particular,
-$$r_2\le25\,2^{-46},\quad
+$$r_2\le25\thinspace 2^{-46},\quad
  \frac{2(1+2\cdot2)r_2}{1/2}\le2^{-37}.$$
 For the original covariance, its $3/4$ spectral floor, the Cholesky allowance
 $2^{-42}$ and the proved output bound $1$ give residual radius
-$(1+2\cdot2)r_2+2\,2^{-42}$; multiplying by $2/(3/4)$ still fits $2^{-37}$.
+$(1+2\cdot2)r_2+2\thinspace 2^{-42}$; multiplying by $2/(3/4)$ still fits $2^{-37}$.
 These finite allowances retain factorization and substitution error.
 
 The 162 stored-factor boundary/interior/signed-zero native regressions compare
@@ -824,7 +832,7 @@ Proof witnesses are in
 native runs for `HL` and `L(HL)ᵀ`. It includes both rounded product errors:
 
 $$
-|\widehat{P H^T}_{ij}-(LL^TH^T)_{ij}| \le 5\,\mathrm{productRadius}(2,8)
+|\widehat{P H^T}_{ij}-(LL^TH^T)_{ij}| \le 5\thinspace \mathrm{productRadius}(2,8)
 =5\cdot2^{-46}.
 $$
 
@@ -1312,7 +1320,7 @@ QR, and the mean product. It proves success and a valid returned factor. With
 $e=\mathrm{productRadius}(n,M_{FL})$, its absolute covariance allowance is
 
 $$
-G_{2n,n}(M_{QR})+n\bigl(2e\,nB_FB_L+e^2\bigr)
+G_{2n,n}(M_{QR})+n\bigl(2e\thinspace nB_FB_L+e^2\bigr)
 +\mathrm{diagonalRadius}(n,M_Q)
 +\mathrm{divisionRadius}(n,M_Q,\delta_Q,D_Q).
 $$
@@ -1478,8 +1486,8 @@ it does not require matrix entries to equal their bounds.
 | Transition and observation entry bounds | $1/32$ each |
 | Incoming prediction/innovation factor entries; measurement-noise factor entries | $2$ |
 | All rounded product term-mass budgets, including mean operations | $8$ |
-| Noise Cholesky row mass, diagonal floor and diagonal bound | $8,\;1/2,\;2$ |
-| Gain solve row mass, diagonal floor and factor entry bound | $32,\;1/2,\;2$ |
+| Noise Cholesky row mass, diagonal floor and diagonal bound | $8,\mspace{5mu}1/2,\mspace{5mu}2$ |
+| Gain solve row mass, diagonal floor and factor entry bound | $32,\mspace{5mu}1/2,\mspace{5mu}2$ |
 | Computed gain entry bound | $1$ |
 | Sum/subtraction exponents | $E=2$, exact stored-operand magnitude at most $4$ |
 | All three QR budgets | $M=2$: four-column prearray, row energies $\le2$, Gram floor $\ge1/2$ |
@@ -1826,7 +1834,7 @@ not an initialization or complete-filter invariant.
 | Completed conclusion | Bound / structure |
 | --- | --- |
 | Actual HL, original-R Cholesky, innovation QR and both gain solves | Succeed with finite shaped storage; all profiles derived |
-| Formed PHT $=\mathrm{fl}(L\widehat{HL}^{\,T})$ | Exactly decoded diagonal; entries bounded by $7/2$ |
+| Formed PHT $=\mathrm{fl}(L\widehat{HL}^{\thinspace T})$ | Exactly decoded diagonal; entries bounded by $7/2$ |
 | Formed PHT discrepancy from $P_L$ | $2^{-43}$, about $1.14\times10^{-13}$ |
 | Chosen complete innovation profile radius | $9\cdot2^{-32}$, about $2.10\times10^{-9}$ |
 | Actual gain | Exactly decoded diagonal; diagonal entries in $[3/8,13/16]$ |
@@ -1923,7 +1931,7 @@ factor when multiplying gain discrepancy by the exact residual:
 
 $$
 e_{\mathrm{mean}}
-\le2^{-44}+\frac{35}{16}\,2^{-27}
+\le2^{-44}+\frac{35}{16}\thinspace 2^{-27}
 \le2^{-25}.
 $$
 
@@ -2044,9 +2052,9 @@ substitution passes, mean correction, posterior arithmetic and posterior QR.
 Its public accuracy bounds are
 
 $$
-\max_{i,j}|\widehat P_{ij}^+-P^+_{\mathrm{step},ij}|\le3\,2^{-30},
+\max_{i,j}|\widehat P_{ij}^+-P^+_{\mathrm{step},ij}|\le3\thinspace 2^{-30},
 \qquad
-\max_i|\widehat x_i^+-x^+_{\mathrm{step},i}|\le5\,2^{-28}.
+\max_i|\widehat x_i^+-x^+_{\mathrm{step},i}|\le5\thinspace 2^{-28}.
 $$
 
 These are approximately `2.79×10⁻⁹` and `1.86×10⁻⁸`, respectively. The ideal
@@ -2057,7 +2065,7 @@ agrees with the native metadata. A joint radius weighting covariance by two
 is also bounded by
 
 $$
-\delta=5\,2^{-28}.
+\delta=5\thinspace 2^{-28}.
 $$
 
 The composition preserves several sharper intermediate statements:
@@ -2081,9 +2089,9 @@ Consequently the explicit full-step allowances satisfy
 
 $$
 \begin{aligned}
-e_P&\le2^{-29}+\frac25(7\,2^{-32})\le3\,2^{-30},\\
-e_x&\le9\,2^{-29}+\frac8{13}2^{-46}
-       +\frac{17}{30}(7\,2^{-32})\le5\,2^{-28}.
+e_P&\le2^{-29}+\frac25(7\thinspace 2^{-32})\le3\thinspace 2^{-30},\\
+e_x&\le9\thinspace 2^{-29}+\frac8{13}2^{-46}
+       +\frac{17}{30}(7\thinspace 2^{-32})\le5\thinspace 2^{-28}.
 \end{aligned}
 $$
 
@@ -2166,7 +2174,7 @@ At every prefix `t≤horizon`, initialization and the actual native driver succe
 the native stored invariant persists, and the entrywise/component bounds are
 
 $$
-\max_{i,j}|\widehat P_{t,ij}-P_{t,ij}|\le 5\,2^{-30},\qquad
+\max_{i,j}|\widehat P_{t,ij}-P_{t,ij}|\le 5\thinspace 2^{-30},\qquad
 \max_i|\widehat x_{t,i}-x_{t,i}|\le 2^{-24}.
 $$
 
@@ -2185,8 +2193,8 @@ and Eₓ=`2⁻²⁴`, `uniform_budget_caps` proves the complete inequalities
 
 $$
 \begin{aligned}
-3\,2^{-30}+\frac9{25}E_P&\le E_P,\\
-5\,2^{-28}+\frac35E_x+\frac12E_P&\le E_x,\\
+3\thinspace 2^{-30}+\frac9{25}E_P&\le E_P,\\
+5\thinspace 2^{-28}+\frac35E_x+\frac12E_P&\le E_x,\\
 2^{-42}&\le E_P.
 \end{aligned}
 $$
@@ -2227,7 +2235,7 @@ Against the independent ideal trajectory from the original dense initial words,
 
 $$
 \max_{i,j}|P^{\mathrm{dense}}_{t,ij}-P_{t,ij}|
-\le 5\,2^{-30}+2^{-48},\qquad
+\le 5\thinspace 2^{-30}+2^{-48},\qquad
 \max_i|x^{\mathrm{dense}}_{t,i}-x_{t,i}|\le2^{-24}.
 $$
 
@@ -2235,7 +2243,7 @@ The separate multiplication error is `2⁻⁴⁸`. The decoded dense covariance 
 completed strict-PD floor
 
 $$
-\frac7{16}-2\,2^{-48}=\frac7{16}-2^{-47}\ge\frac38>0.
+\frac7{16}-2\thinspace 2^{-48}=\frac7{16}-2^{-47}\ge\frac38>0.
 $$
 
 `materialization_positive` derives this from the native invariant's exact Gram

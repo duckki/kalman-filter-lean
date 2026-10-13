@@ -92,15 +92,15 @@ Given $Q=T_QT_Q^T$ and $R=T_RT_R^T$, the stages are:
 
 $$
 \begin{aligned}
-A_{\rm pred} &= [FL\;T_Q],\\
-A_{\rm innov} &= [T_R\;HL^-],\\
-A_{\rm post} &= [(I-KH)L^-\;KT_R].
+A_{\rm pred} &= [FL\mspace{5mu}T_Q],\\
+A_{\rm innov} &= [T_R\mspace{5mu}HL^-],\\
+A_{\rm post} &= [(I-KH)L^-\mspace{5mu}KT_R].
 \end{aligned}
 $$
 
 Each stage applies QR to $A^T$ and retains a lower factor $L=R_{\rm QR}^T$.
 The ideal `QRGramFactor` relation explicitly requires an orthogonal right
-transformation $U$ with $AU=[L\;0]$, a lower triangular $L$, and a positive
+transformation $U$ with $AU=[L\mspace{5mu}0]$, a lower triangular $L$, and a positive
 diagonal sign convention. It specifies mathematical factorization without
 choosing a canonical noncomputable QR algorithm.
 

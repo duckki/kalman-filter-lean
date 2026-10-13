@@ -188,7 +188,7 @@ domain: `OrthogonalFactorization.gramFactor` succeeds and meets a Gram bound
 following the actual scaled norms, reflectors, signs, zero writes, diagonal
 rescaling and rounding order. Classical QR analysis guides this work; applying
 it to this precise program is a formal software contribution. Prediction
-prearray rounding for $[\widehat{FL}\;T_Q]$, its QR composition and the discrepancy
+prearray rounding for $[\widehat{FL}\mspace{5mu}T_Q]$, its QR composition and the discrepancy
 from ideal prior/noise covariances are now proved under explicit profiles.
 Innovation, gain, posterior and mean propagation complete the full step.
 
