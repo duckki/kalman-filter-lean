@@ -146,7 +146,7 @@ $$
 |\widehat y_i-y_i|\le (k+1)2^{-42}M\le2^{-36}M.
 $$
 
-For $k=32$, the sharper formula is $33\thinspace 2^{-42}M$, about
+For $k=32$, the sharper formula is $33\cdot 2^{-42}M$, about
 $7.50\times10^{-12}M$. This is an absolute stored-operand bound, not a relative
 error bound on $y_i$; cancellation may make $y_i$ zero or very small.
 
@@ -633,7 +633,7 @@ $$
 consecutive Gram comparisons with the Real triangle inequality. There is no
 additional amplification or trailing-column-count factor. Under nonnegative
 budgets bounded by $B$ and active heights at most 32, `qrGramRadius_le` supplies
-the conservative cap $G_{h,w}(M)\le w\thinspace 2^{-4}B^2$. The explicit sum is more
+the conservative cap $G_{h,w}(M)\le w\cdot 2^{-4}B^2$. The explicit sum is more
 informative than that coarse cap. These are absolute entry bounds, not sharp
 relative or normwise Householder backward-stability constants.
 

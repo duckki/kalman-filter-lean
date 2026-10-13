@@ -178,7 +178,7 @@ probability measures.
 
 For Theorem 2, $s_n,u_n$ are exact input densities and $s'_n,u'_n$ are their
 Gaussian approximants. The exact posterior is the normalized density
-$p_n=\mathrm{normalize}(u_n\thinspace \tau s_n/p)$, where $\tau$ is Gaussian
+$p_n=\mathrm{normalize}(u_n\cdot \tau s_n/p)$, where $\tau$ is Gaussian
 prediction and $p$ is the stationary density. Exact updates must be valid at
 every index. A1–A5 require: $s_n$ converges weakly to a probability measure;
 the prior approximation error tends to zero in L¹; $u_n$ concentrates at a
@@ -253,7 +253,7 @@ The linked **ak-2485/Kalman_Filter** repository was inspected at
 On 2026-10-09, this remained its latest default-branch commit. This older
 repository is not the whole of the group's subsequent work; see Elaenia below.
 `mean_error.v` has `Qed` proofs for a binary32 local absolute bound
-$1.2\times10^{-4}$ and an $N\thinspace 1.2\times10^{-4}$ averaging bound for $N\le10$
+$1.2\times10^{-4}$ and an $N\cdot 1.2\times10^{-4}$ averaging bound for $N\le10$
 and finite inputs in $[0,10]$. Imported `Mean.v` also contains an admitted
 generic step lemma. This does not establish that the concrete bound depends on
 that admission; a transitive assumption audit is required before reuse.

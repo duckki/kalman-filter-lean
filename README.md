@@ -72,7 +72,7 @@ at most $2^{-25}$, both below $3\times10^{-8}$.
 **Fully observed diagonal profile:** $H=I$ and diagonal transition magnitudes
 are at most one, including identity and near-identity dynamics, with bounded
 diagonal covariances and measurements. Returned dense covariance error is at
-most $5\thinspace 2^{-30}+2^{-48}$, below $4.7\times10^{-9}$; mean error is at most
+most $5\cdot 2^{-30}+2^{-48}$, below $4.7\times10^{-9}$; mean error is at most
 $2^{-24}$, below $6\times10^{-8}$.
 
 In both profiles, initialization and every native step succeed. The bounds
