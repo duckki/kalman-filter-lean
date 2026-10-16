@@ -114,3 +114,4 @@ import Kalman.Proofs.FloatJosephUncertainty
 import Kalman.Proofs.JosephGainSensitivity
 import Kalman.Proofs.FloatJosephPositionCorrection
 import Kalman.Proofs.FloatSymmetricJosephCorrection
+import Kalman.Proofs.FloatConstantVelocityPrediction

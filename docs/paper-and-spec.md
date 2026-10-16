@@ -1235,3 +1235,23 @@ the wrapper. Regressions check exact copied words, signed zero, positive stored
 determinants, shape rejection and nonpositive-innovation rejection. This result
 remains a local correction certificate; coupled prediction and domain closure
 require separate results.
+
+### Coupled constant-velocity prediction
+
+`Definitions/Theorems/ConstantVelocity.transition` specializes the attributed
+linear prediction to `[[1, dt], [0, 1]]`. This is a project model choice, not a
+new source equation. `Implementation/Correctness/ConstantVelocityPrediction`
+records an original-word envelope: finite `|dt| <= 1`, covariance/process entry
+caps two, mean cap one, PSD prior/process covariance, and ordinary validation.
+`Proofs/FloatConstantVelocityPrediction.prediction_stages` derives every actual
+dense product, addition and guard. Covariance/mean local error radii are
+`2^-36` / `2^-41` against the exact prediction of those same input words.
+
+`SymmetricJosephFilter.predict` repairs the prediction storage too;
+`predict_accuracy` proves finiteness, shape, Hermitian decoding, and unchanged
+radii. The runtime `step` composes repaired prediction and correction, and
+`run` propagates the first checked error. These executable drivers do not yet
+claim domain closure merely from their existence. Thirty-six independent
+Fraction references cover three nonzero time increments, correlated priors,
+two process-noise scales and two initial means. As with the correction, the
+normalized bounds are sufficient project constants, not physical sensor units.
