@@ -1331,3 +1331,37 @@ the previous linear accumulated bound. The original measurement bound and
 `2^20` horizon cap are retained here; this theorem alone does not widen the
 operating domain. The existing independent tracking regressions exercise the
 unchanged runtime, and the new exact/native results enter the axiom audit.
+
+### Nonstationary correlated covariance neighborhood
+
+`TrackingCovarianceTube` replaces exact fixed covariance words by two Loewner
+inequalities around the nominal posterior: `-epsilon*L <= P-P0 <= epsilon*L`,
+where `epsilon = 2^-12` and `L = [[75,40],[40,272]]/47`. The completed exact
+identity is `A*L*A^T = L-I`, where `A` is the nominal closed-loop mean matrix.
+The neighborhood has entrywise extent at most `6*epsilon` and every covariance
+in it has floor `1/8`. These are project-derived sufficient constants.
+
+`FloatCorrelatedPrediction` derives all native prediction conditions and every
+reached position-correction condition from original finite storage and model
+bounds. `FloatCorrelatedCorrection` pays for prediction rounding, fixed-gain
+model changes, quadratic gain optimization and rounded Joseph evaluation using
+the Lyapunov slack. Its output covariance remains in the same neighborhood;
+it is not assumed or forced to equal the initial matrix. A native input witness
+has covariance `P0 + epsilon*I`, distinct from the stationary example.
+
+`CorrelatedTracking.ModelDomain` states original-word matrix parameter bounds
+around the nominal model, with the position row fixed, measurement noise at
+least one, and finite measurements bounded by `2^-24`. The general internal
+model allowance is `2^-21`; a concrete scalar-parameter interface is separate.
+`FloatCorrelatedTracking.horizon_preservation` proves actual checked prefixes,
+finite shaped output, the retained covariance neighborhood and an absolute mean
+envelope for at most 16 steps. This short transient horizon is limited by the
+conservative mean enclosure, not by a requirement for constant covariance.
+Its nominal mean comparison charges gain/model changes as well as arithmetic;
+it is a preservation theorem, distinct from the tight stationary-family
+original-input forward-error certificate.
+
+The independent Fraction generator has a `--transient` mode. Regressions start
+above and below the nominal covariance, check that the covariance evolves,
+check both neighborhood inequalities at every prefix, and compare twelve
+checkpoints against independent original-word exact recursion.

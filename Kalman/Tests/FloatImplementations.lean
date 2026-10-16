@@ -604,6 +604,126 @@ def constantVelocityTrackingChecks : IO Unit := do
       && driven.covariance.map Float.toBits == current.covariance.map Float.toBits)
     "coupled tracking driver preserves exact retained words"
 
+def correlatedTransientReference : Array (Array Float) :=
+  #[
+    #[0.125, -0.5, 0.499755859375, 0.25, 0.25, 0.999755859375],
+    #[
+      2.979845653381266e-08,
+      -0.49999998509872512,
+      0.4999351417343863,
+      0.25000190759604746,
+      0.25000190759604746,
+      0.99977016448246914
+    ],
+    #[
+      -0.062502459046443304,
+      -0.46875225746632637,
+      0.49998043193735292,
+      0.24998200730262493,
+      0.24998200730262493,
+      0.99979304765247312
+    ],
+    #[
+      -0.097904686782674569,
+      -0.3748897825278536,
+      0.49999096685700389,
+      0.24996784128822744,
+      0.24996784128822744,
+      0.99985973190709598
+    ],
+    #[
+      -0.070202859468554799,
+      -0.2076482282086374,
+      0.49999505293254254,
+      0.24998507777586804,
+      0.24998507777586804,
+      0.99995480504199286
+    ],
+    #[
+      -0.020219501151322809,
+      -0.056408212483882274,
+      0.49999956627123737,
+      0.24999878852333676,
+      0.24999878852333676,
+      0.99999661611192581
+    ],
+    #[0.125, -0.5, 0.500244140625, 0.25, 0.25, 1.000244140625],
+    #[
+      2.9806187238907779e-08,
+      -0.49999998509895249,
+      0.50006484144359942,
+      0.24999809289871766,
+      0.24999809289871766,
+      1.0002298355029788
+    ],
+    #[
+      -0.062497567739973586,
+      -0.46874775918381167,
+      0.50001956238756962,
+      0.25001799360672106,
+      0.25001799360672106,
+      1.0002069497564261
+    ],
+    #[
+      -0.097896074012198853,
+      -0.37486606727544164,
+      0.50000903221628923,
+      0.2500321568133923,
+      0.2500321568133923,
+      1.0001402582614827
+    ],
+    #[
+      -0.070190741116652078,
+      -0.20761291180963953,
+      0.50000494619256386,
+      0.25001491957183003,
+      0.25001491957183003,
+      1.0000451868537776
+    ],
+    #[
+      -0.020214982777449177,
+      -0.056395610900463848,
+      0.50000043362745539,
+      0.25000121119359942,
+      0.25000121119359942,
+      1.0000033830971511
+    ],
+  ]
+
+def correlatedTransientChecks : IO Unit := do
+  let checkpoints := #[0, 1, 2, 4, 8, 16]
+  let mut index := 0
+  for sign in [-1.0, 1.0] do
+    let e := 0.000244140625
+    let initialCovariance := #[0.5 + sign * e, 0.25, 0.25, 1.0 + sign * e]
+    let mut current : State := ⟨#[0.125, -0.5], initialCovariance⟩
+    let mut checkpoint := 0
+    for t in [:17] do
+      if t > 0 then
+        check (current.covariance.map Float.toBits != initialCovariance.map Float.toBits)
+          "transient covariance actually evolves"
+      let d0 := current.covariance[0]! - 0.5
+      let d1 := current.covariance[1]! - 0.25
+      let d2 := current.covariance[3]! - 1.0
+      for side in [-1.0, 1.0] do
+        let a := e * (75.0 / 47.0) + side * d0
+        let b := e * (40.0 / 47.0) + side * d1
+        let c := e * (272.0 / 47.0) + side * d2
+        check (a > 0.0 && c > 0.0 && a * c - b * b > 0.0)
+          "nonstationary covariance stays in the Lyapunov neighborhood"
+      if checkpoint < checkpoints.size && t == checkpoints[checkpoint]! then
+        check
+          (close (current.mean ++ current.covariance) correlatedTransientReference[index]!
+            1.0e-12)
+          "independent original-input nonstationary reference"
+        checkpoint := checkpoint + 1
+        index := index + 1
+      if t < 16 then
+        current ←
+          requireOk (SymmetricJosephFilter.step (constantVelocityTrackingInput t) current)
+            "nonstationary checked tracking step"
+  check (index == 12) "all transient reference checkpoints exercised"
+
 def scalarChecks : IO Unit := do
   let input := scalar 1.0 1.0 1.0
   let initial : State := ⟨#[0.0], #[1.0]⟩
@@ -4117,6 +4237,7 @@ def run : IO Unit := do
   josephSymmetryRepairChecks
   constantVelocityPredictionChecks
   constantVelocityTrackingChecks
+  correlatedTransientChecks
   josephCertifiedHorizonChecks
   negativeVarianceChecks
   repeatedNegativeChecks

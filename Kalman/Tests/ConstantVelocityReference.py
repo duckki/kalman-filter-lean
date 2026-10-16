@@ -37,9 +37,30 @@ def tracking_references():
         a, b, c = aa / s, bb / s, cc - bb * bb / s
 
 
+def transient_references():
+    """Nonstationary covariance, using exact original-word scalar equations."""
+    for sign in [-1, 1]:
+        p, v = F(1, 8), F(-1, 2)
+        a, b, c = F(1, 2) + sign * F(1, 4096), F(1, 4), F(1) + sign * F(1, 4096)
+        measurements = [F(1, 2**24), F(-1, 2**24), F(0), F(1, 2**25)]
+        for t in range(17):
+            if t in {0, 1, 2, 4, 8, 16}:
+                yield [p, v, a, b, b, c]
+            if t == 16:
+                break
+            pp, vv = p + v / 4, v
+            aa, bb, cc = a + b / 2 + c / 16 + F(5, 16), b + c / 4, c + F(1, 8)
+            s = aa + 1
+            residual = measurements[t % 4] - pp
+            p, v = pp + aa / s * residual, vv + bb / s * residual
+            a, b, c = aa / s, bb / s, cc - bb * bb / s
+
+
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--tracking', action='store_true', help='emit tracking checkpoints')
+    parser.add_argument('--transient', action='store_true', help='emit covariance-transient checkpoints')
     args = parser.parse_args()
-    for row in tracking_references() if args.tracking else references():
+    rows = transient_references() if args.transient else tracking_references() if args.tracking else references()
+    for row in rows:
         print('  #[' + ', '.join(format(float(v), '.17g') for v in row) + '],')
