@@ -336,10 +336,14 @@ identity subtraction, WP multiplication, multiplication by transposed W,
 KR multiplication, multiplication by transposed K, then addition. This is the
 same direct Joseph expression attributed above; no runtime reassociation, FMA,
 symmetry repair, or exceptional-value behavior is introduced. The sufficient
-two-state stored-entry caps P/H/R/K = 2/1/(3/2)/1, derived product
+two-state stored-entry caps P/H/R/K = 4/1/(3/2)/1, derived product
 mass 256, sum exponents 2 and 8, and error allowance 2^-34 are project choices,
 not constants from the source literature. The comparator uses the same stored
-gain and dense prior. This theorem does not yet certify the gain computation
+gain and dense prior. Stored `W` is bounded by `7/2`, exact `I-KH` by three,
+and stored `WP` and the first congruence term by 29 and 204. These sharper
+intermediate bounds allow the prior cap of four (covering the reached `13/4`
+prediction bound) without increasing the `2^-34` allowance.
+This theorem does not yet certify the gain computation
 or accumulated full-filter error. It reuses the pinned FLARE nearest-arithmetic,
 matrix multiplication, and native/model bridges already recorded here.
 

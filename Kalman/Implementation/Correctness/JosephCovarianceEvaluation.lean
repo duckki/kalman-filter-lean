@@ -47,7 +47,7 @@ structure TwoStateDomain (input : Input.Model) (prior : Input.State) (k : Array 
   observation_finite : input.observation.all Float.isFinite = true
   noise_finite : input.measurementNoise.all Float.isFinite = true
   gain_finite : k.all Float.isFinite = true
-  covariance_bound : ∀ i j, |matrix 2 2 prior.covariance i j| ≤ 2
+  covariance_bound : ∀ i j, |matrix 2 2 prior.covariance i j| ≤ 4
   observation_bound : ∀ i j, |matrix 2 2 input.observation i j| ≤ 1
   noise_bound : ∀ i j, |matrix 2 2 input.measurementNoise i j| ≤ 3 / 2
   gain_bound : ∀ i j, |matrix 2 2 k i j| ≤ 1

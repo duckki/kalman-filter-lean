@@ -24,7 +24,7 @@ def references():
         [1 / 64, -1 / 64, 1 / 64, 1 / 64],
         [1.0, 0.0, 0.0, 1.0],
     ]
-    for p0 in [1.0, 2.0]:
+    for p0 in [1.0, 2.0, 4.0]:
         p = list(map(F, [p0, 0.25, 0.25, 1.5]))
         r = list(map(F, [1.5, -0.25, -0.25, 1.0]))
         for obs in observations:

@@ -307,7 +307,7 @@ the Joseph statement concerns its covariance kernel with a supplied gain.
 | `choleskySolveAccuracy` | $\lvert X_{ij}-((LL^T)^{-1}B)_{ij}\rvert \le n(1+nD)r_n/\alpha$ | `SolveProfile` for both successful passes; correct finite storage; $(LL^T-\alpha I)\succeq0$, $\alpha>0$; reference is the stored factor's exact Gram |
 | `ldlSolveAccuracy` | Solution error in column $j$ at most $\frac{n}{3/16}\sum_i\mathrm{residualBound}(i,j)$; execution succeeds with finite output | $n\le12$, stored coefficient magnitude $\le1024$, $(A-\frac3{16}I)\succeq0$, finite correctly shaped arrays, RHS magnitude $\le2^B$ for $0\le B\le512$ |
 | `josephCovarianceAccuracy` | $\lvert \widehat J_{ij}-J(P,H,R,K)_{ij}\rvert \le e_J$; all five products and both sums are covered | `JosephProfile` records successful computations and operand budgets; $e_J$ is the public `Proofs.ArithmeticProfiles.josephRadius`; reference uses the same stored gain, with separate entry bounds on $P,I-KH,K$ |
-| `FloatJosephDomain.stored_input_accuracy` | All covariance-kernel operations succeed with finite 2×2 output and entrywise error at most $2^{-34}$ | Stored finite $P,H,R,K$ entry bounds $2,1,3/2,1$; no intermediate execution or profile premise; same stored gain comparator |
+| `FloatJosephDomain.stored_input_accuracy` | All covariance-kernel operations succeed with finite 2×2 output and entrywise error at most $2^{-34}$ | Stored finite $P,H,R,K$ entry bounds $4,1,3/2,1$; no intermediate execution or profile premise; same stored gain comparator |
 | `FloatJosephSolve.solve_accuracy` | Actual two-state LDLᵀ solve succeeds, is finite, preserves decoded diagonal RHS structure, and has entrywise forward error at most $2^{-40}$ against $A^{-1}B$ | Finite diagonal coefficients with entries in $[3/2,5]$ and finite RHS entries bounded by four; no intermediate execution premise |
 | `FloatJosephStructure.stored_input_positive` | Rounded dense Joseph output is diagonal, finite, positive definite, has diagonal floor $1/8$, and retains the $2^{-34}$ evaluation bound | Stored-input domain above, $H=I$, decoded diagonal $P,R,K$, and prior/noise diagonal entries at least $1/2$; supplied gain may be nonoptimal |
 | `qrGramFactorInitialAccuracy` | Execution succeeds with finite lower-positive $L$; exact $LL^T\succeq(M^2/16)I$ is PD; $`\lvert(LL^T-AA^T)_{ij}\rvert\le G_{d,n}(M)\le M^2/128`$ | Original finite $n\times d$ array, $n\le d\le8$, $2^{-896}\le M\le2^{900}$, row energies $\le M^2/2$, $AA^T\succeq(M^2/8)I$; no run or intermediate profile assumption |
@@ -641,14 +641,14 @@ Kalman gain requires solve conditioning and error propagation in addition.
 `FloatJosephDomain.covariance_stages` now derives the complete profile from
 stored operands on an explicit two-state/two-measurement domain. Original
 arrays have four finite entries each, with entry magnitudes
-$|P_{ij}|\le2$, $|H_{ij}|\le1$, $|R_{ij}|\le3/2$, and
+$|P_{ij}|\le4$, $|H_{ij}|\le1$, $|R_{ij}|\le3/2$, and
 $|K_{ij}|\le1$. No intermediate run, profile, or desired error is assumed.
 Correlated inputs, full observation $H=I$, and signed gains are permitted. Neither positivity nor
 optimality of the supplied gain is required for this evaluation bound.
 
 All five products have derived mass allowance 256. The subtraction and final
 addition use exponents 2 and 8, respectively; the reached magnitude caps for
-$W,WP,WPW^T,KR,KRK^T$ are $4,17,137,4,9$. Substituting the actual
+$W,WP,WPW^T,KR,KRK^T$ are $7/2,29,204,4,9$. Substituting the actual
 profile constants into the complete radius above gives
 $e_J\le2^{-34}$ (approximately $5.9\times10^{-11}$).
 `FloatJosephDomain.stored_input_accuracy` proves native kernel success,
@@ -661,7 +661,7 @@ This is a completed stored-gain covariance-evaluation result, not a complete
 Joseph filter certificate. Prediction, the actual LDLᵀ gain solve, mean error,
 returned covariance structure, and accumulated independent-trajectory accuracy
 remain to be composed and discharged for a Joseph operating invariant.
-Forty native cases compare against an independent exact-rational expanded
+Sixty native cases compare against an independent exact-rational expanded
 Joseph polynomial in `Tests/JosephReference.py`; the `10^-14` regression
 tolerance is separate from the proved allowance. They include correlated
 priors/noise, full observation, boundary and non-dyadic gain words, signed zeros,
@@ -701,7 +701,10 @@ statement: with `H=I`, diagonal stored `P,R,K`, prior/noise variances at least
 output has diagonal entries at least `1/8` and is positive definite. Exact
 scalar Joseph variance is at least `1/4` for every real gain in this domain;
 the evaluation error leaves the stated margin. Gain optimality is unnecessary.
-Forty-eight native cases exercise boundary variances, nonoptimal signed gains,
+The prior-entry cap of four covers the reached prediction bound `13/4` used
+by the observable QR analysis. Sharper bounds on stored `W` (`7/2`) and exact
+`I-KH` (three) retain the same evaluation allowance on this wider domain.
+Seventy-two native cases exercise boundary variances, nonoptimal signed gains,
 and signed zeros. This local result does not yet establish the operating
 invariant or a full-filter horizon.
 

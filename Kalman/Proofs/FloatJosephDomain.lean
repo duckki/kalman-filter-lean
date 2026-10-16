@@ -128,7 +128,7 @@ theorem covariance_stages (input : Input.Model) (prior : Input.State) (k : Array
     (by simpa only [↓reduceIte, ← sub_eq_add_neg] using pw.magnitude)
   have ew := FloatJosephError.subtract_within (n := 2) (m := 2) pw
     (by simp [identity, Flare.Matrix.Dense.identity]) hw
-  have wb : ∀ i j, |matrix 2 2 w i j| ≤ 4 := by
+  have wb : ∀ i j, |matrix 2 2 w i j| ≤ 7 / 2 := by
     intro i j
     have hm := (abs_sub _ _).trans (add_le_add (idb i j) (khcap i j))
     have hd := abs_sub_le (matrix 2 2 w i j) ((matrix 2 2 (identity 2) - matrix 2 2 kh) i j) 0
@@ -137,14 +137,14 @@ theorem covariance_stages (input : Input.Model) (prior : Input.State) (k : Array
     norm_num [sumRadius] at he
     linarith only [hd, hm, he]
   obtain ⟨wp, pwp, hwp, _, wpf, wpb⟩ := product w prior.covariance
-    4 2 wf d.covariance_finite (by norm_num) (by norm_num) wb d.covariance_bound
-  have wpcap : ∀ i j, |matrix 2 2 wp i j| ≤ 17 := by
+    (7 / 2) 4 wf d.covariance_finite (by norm_num) (by norm_num) wb d.covariance_bound
+  have wpcap : ∀ i j, |matrix 2 2 wp i j| ≤ 29 := by
     intro i j
     exact (wpb i j).trans (by norm_num [productRadius])
   have wtf := (Flare.Matrix.Multiplication.transpose_storage 2 2 w wf).2.1
   obtain ⟨first, pf, hfirst, fs, ff, fb⟩ := product wp (transpose 2 2 w)
-    17 4 wpf wtf (by norm_num) (by norm_num) wpcap (transpose_bound w _ wf wb)
-  have fcap : ∀ i j, |matrix 2 2 first i j| ≤ 137 := by
+    29 (7 / 2) wpf wtf (by norm_num) (by norm_num) wpcap (transpose_bound w _ wf wb)
+  have fcap : ∀ i j, |matrix 2 2 first i j| ≤ 204 := by
     intro i j
     exact (fb i j).trans (by norm_num [productRadius])
   obtain ⟨kr, pkr, hkr, _, krf, krb⟩ := product k input.measurementNoise
@@ -206,7 +206,7 @@ theorem stored_input_accuracy : StoredInputAccuracy := by
       |((1 : Matrix (Fin input.stateDimension) (Fin input.stateDimension) ℝ)
         - matrix input.stateDimension input.measurementDimension k
           * matrix input.measurementDimension input.stateDimension input.observation) i j|
-        ≤ 4 := by
+        ≤ 3 := by
     rw [d.state_dimension, d.measurement_dimension]
     intro i j
     have hid : |(1 : Matrix (Fin 2) (Fin 2) ℝ) i j| ≤ 1 := by
@@ -215,11 +215,11 @@ theorem stored_input_accuracy : StoredInputAccuracy := by
     have hprod := product_magnitude (matrix 2 2 k) (matrix 2 2 input.observation)
       1 1 d.gain_bound d.observation_bound i j
     exact (abs_sub _ _).trans ((add_le_add hid hprod).trans (by norm_num))
-  have he := FloatJosephError.joseph_evaluation_error p 2 4 1
+  have he := FloatJosephError.joseph_evaluation_error p 4 3 1
     (by norm_num) (by norm_num) (by norm_num)
     (by rw [d.state_dimension]; exact d.covariance_bound) hwbound
     (by rw [d.state_dimension, d.measurement_dimension]; exact d.gain_bound)
-  have hcap : josephRadius p 2 4 1 ≤ (2 : ℝ) ^ (-34 : Int) := by
+  have hcap : josephRadius p 4 3 1 ≤ (2 : ℝ) ^ (-34 : Int) := by
     norm_num [josephRadius, d.state_dimension, d.measurement_dimension,
       hkh, hwp, hfirst, hkr, hsecond, hw, hsum, productRadius, sumRadius]
   exact ⟨
