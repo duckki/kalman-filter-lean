@@ -328,6 +328,21 @@ PD composition from the same original input conditions.
 The regressions include a tiny full-rank factor whose dense materialization
 underflows to the zero matrix, making this distinction observable.
 
+## Direct Joseph covariance evaluation domain
+
+The direct Joseph stored-input evaluation theorem uses the existing
+`CovarianceFilter.covarianceUnchecked .joseph` order: KH multiplication,
+identity subtraction, WP multiplication, multiplication by transposed W,
+KR multiplication, multiplication by transposed K, then addition. This is the
+same direct Joseph expression attributed above; no runtime reassociation, FMA,
+symmetry repair, or exceptional-value behavior is introduced. The sufficient
+two-state stored-entry caps P/H/R/K = 2/1/(3/2)/1, derived product
+mass 256, sum exponents 2 and 8, and error allowance 2^-34 are project choices,
+not constants from the source literature. The comparator uses the same stored
+gain and dense prior. This theorem does not yet certify the gain computation
+or accumulated full-filter error. It reuses the pinned FLARE nearest-arithmetic,
+matrix multiplication, and native/model bridges already recorded here.
+
 ## Authoritative decoded input contract
 
 `Definitions/Input.Model` owns the one native input format. It contains state

@@ -46,8 +46,10 @@ mean equivalence are also proved. See [the sources and specification](docs/paper
   The same one-step negative-variance example is certified.
 - **Direct Joseph:** Evaluates the two congruence terms and adds them. Its
   completed local covariance-evaluation bound compares with the exact Joseph
-  expression at the supplied stored gain. Complete filter accuracy is a
-  separate obligation.
+  expression at the supplied stored gain. A two-state stored-input theorem
+  derives every covariance operation's success and entrywise error at most
+  $2^{-34}$ from explicit operand ranges, including full observation $H=I$.
+  Complete filter accuracy remains a separate obligation.
 - **QR square-root:** Stores a lower triangular covariance factor $L$ with
   positive diagonal, denoting covariance $LL^T$. It uses QR for prediction,
   innovation, and a factored Joseph correction, with triangular solves for the

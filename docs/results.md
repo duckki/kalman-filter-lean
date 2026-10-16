@@ -307,6 +307,7 @@ the Joseph statement concerns its covariance kernel with a supplied gain.
 | `choleskySolveAccuracy` | $\lvert X_{ij}-((LL^T)^{-1}B)_{ij}\rvert \le n(1+nD)r_n/\alpha$ | `SolveProfile` for both successful passes; correct finite storage; $(LL^T-\alpha I)\succeq0$, $\alpha>0$; reference is the stored factor's exact Gram |
 | `ldlSolveAccuracy` | Solution error in column $j$ at most $\frac{n}{3/16}\sum_i\mathrm{residualBound}(i,j)$; execution succeeds with finite output | $n\le12$, stored coefficient magnitude $\le1024$, $(A-\frac3{16}I)\succeq0$, finite correctly shaped arrays, RHS magnitude $\le2^B$ for $0\le B\le512$ |
 | `josephCovarianceAccuracy` | $\lvert \widehat J_{ij}-J(P,H,R,K)_{ij}\rvert \le e_J$; all five products and both sums are covered | `JosephProfile` records successful computations and operand budgets; $e_J$ is the public `Proofs.ArithmeticProfiles.josephRadius`; reference uses the same stored gain, with separate entry bounds on $P,I-KH,K$ |
+| `FloatJosephDomain.stored_input_accuracy` | All covariance-kernel operations succeed with finite 2×2 output and entrywise error at most $2^{-34}$ | Stored finite $P,H,R,K$ entry bounds $2,1,3/2,1$; no intermediate execution or profile premise; same stored gain comparator |
 | `qrGramFactorInitialAccuracy` | Execution succeeds with finite lower-positive $L$; exact $LL^T\succeq(M^2/16)I$ is PD; $`\lvert(LL^T-AA^T)_{ij}\rvert\le G_{d,n}(M)\le M^2/128`$ | Original finite $n\times d$ array, $n\le d\le8$, $2^{-896}\le M\le2^{900}$, row energies $\le M^2/2$, $AA^T\succeq(M^2/8)I$; no run or intermediate profile assumption |
 | `factorMaterializationAccuracy` | Dense $LL^T$ formation error at most $n2^{-50}M$; checked output is valid | Valid retained factor, $1\le n\le32$, finite storage, Gram dot-product mass $\le M$, $2^{-1022}\le M\le2^{990}$ |
 
@@ -634,6 +635,37 @@ specified kernel and entrywise error at most $e_J$ relative to
 $WPW^T+KRK^T$. All five products and both sums are included. The gain may be
 rounded: the reference uses that same stored gain. Comparing against the ideal
 Kalman gain requires solve conditioning and error propagation in addition.
+
+`FloatJosephDomain.covariance_stages` now derives the complete profile from
+stored operands on an explicit two-state/two-measurement domain. Original
+arrays have four finite entries each, with entry magnitudes
+$|P_{ij}|\le2$, $|H_{ij}|\le1$, $|R_{ij}|\le3/2$, and
+$|K_{ij}|\le1$. No intermediate run, profile, or desired error is assumed.
+Correlated inputs, full observation $H=I$, and signed gains are permitted. Neither positivity nor
+optimality of the supplied gain is required for this evaluation bound.
+
+All five products have derived mass allowance 256. The subtraction and final
+addition use exponents 2 and 8, respectively; the reached magnitude caps for
+$W,WP,WPW^T,KR,KRK^T$ are $4,17,137,4,9$. Substituting the actual
+profile constants into the complete radius above gives
+$e_J\le2^{-34}$ (approximately $5.9\times10^{-11}$).
+`FloatJosephDomain.stored_input_accuracy` proves native kernel success,
+finite output of the correct shape, and this absolute entrywise error.
+The result statement and domain are in
+`Implementation/Correctness/JosephCovarianceEvaluation.lean`; a nonzero-gain,
+nonzero-observation, correlated-prior witness proves the domain is inhabited.
+
+This is a completed stored-gain covariance-evaluation result, not a complete
+Joseph filter certificate. Prediction, the actual LDLᵀ gain solve, mean error,
+returned covariance structure, and accumulated independent-trajectory accuracy
+remain to be composed and discharged for a Joseph operating invariant.
+Forty native cases compare against an independent exact-rational expanded
+Joseph polynomial in `Tests/JosephReference.py`; the `10^-14` regression
+tolerance is separate from the proved allowance. They include correlated
+priors/noise, full observation, boundary and non-dyadic gain words, signed zeros,
+and a subnormal gain.
+The runtime schedule, symmetry handling, and pinned floating-point foundation
+are unchanged.
 
 `ErrorPropagation.within_mul` proves, for operand errors $e_A,e_B$ and ideal
 entry bounds $B_A,B_B$, the product propagation allowance

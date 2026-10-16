@@ -40,6 +40,7 @@ import Kalman.Proofs.FloatMaterialization
 import Kalman.Proofs.FloatGramSymmetry
 import Kalman.Proofs.ErrorPropagation
 import Kalman.Proofs.FloatJosephError
+import Kalman.Proofs.FloatJosephDomain
 import Kalman.Proofs.FloatUnderflow
 import Kalman.Proofs.FloatResidualError
 import Kalman.Proofs.FloatCholeskySolve
