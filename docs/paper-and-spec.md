@@ -343,6 +343,19 @@ gain and dense prior. This theorem does not yet certify the gain computation
 or accumulated full-filter error. It reuses the pinned FLARE nearest-arithmetic,
 matrix multiplication, and native/model bridges already recorded here.
 
+The companion `FloatJosephSolve` proof specializes the unchanged native LDLᵀ
+solve to diagonal two-state coefficients in `[3/2,5]` and finite RHS entries
+bounded by four. The first pivot is the original first diagonal word; the
+second differs from its original diagonal value by at most `2^-49`. The lower
+factor decodes to identity. FLARE forward/backward substitution equations and
+rounding bounds then yield `2^-40` entrywise error against the original
+coefficient matrix inverse times RHS, and exact decoded diagonal preservation
+when RHS is diagonal. These intervals and allowances are project choices for
+the forthcoming full Joseph gain proof, not a general conditioning theorem.
+All storage lookups retain the runtime's zero-padding semantics; the result
+does not need an additional array-shape premise. The existing native/model
+bridge and signed-zero interpretation apply unchanged.
+
 ## Authoritative decoded input contract
 
 `Definitions/Input.Model` owns the one native input format. It contains state

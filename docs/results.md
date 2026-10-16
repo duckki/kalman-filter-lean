@@ -308,6 +308,7 @@ the Joseph statement concerns its covariance kernel with a supplied gain.
 | `ldlSolveAccuracy` | Solution error in column $j$ at most $\frac{n}{3/16}\sum_i\mathrm{residualBound}(i,j)$; execution succeeds with finite output | $n\le12$, stored coefficient magnitude $\le1024$, $(A-\frac3{16}I)\succeq0$, finite correctly shaped arrays, RHS magnitude $\le2^B$ for $0\le B\le512$ |
 | `josephCovarianceAccuracy` | $\lvert \widehat J_{ij}-J(P,H,R,K)_{ij}\rvert \le e_J$; all five products and both sums are covered | `JosephProfile` records successful computations and operand budgets; $e_J$ is the public `Proofs.ArithmeticProfiles.josephRadius`; reference uses the same stored gain, with separate entry bounds on $P,I-KH,K$ |
 | `FloatJosephDomain.stored_input_accuracy` | All covariance-kernel operations succeed with finite 2×2 output and entrywise error at most $2^{-34}$ | Stored finite $P,H,R,K$ entry bounds $2,1,3/2,1$; no intermediate execution or profile premise; same stored gain comparator |
+| `FloatJosephSolve.solve_accuracy` | Actual two-state LDLᵀ solve succeeds, is finite, preserves decoded diagonal RHS structure, and has entrywise forward error at most $2^{-40}$ against $A^{-1}B$ | Finite diagonal coefficients with entries in $[3/2,5]$ and finite RHS entries bounded by four; no intermediate execution premise |
 | `qrGramFactorInitialAccuracy` | Execution succeeds with finite lower-positive $L$; exact $LL^T\succeq(M^2/16)I$ is PD; $`\lvert(LL^T-AA^T)_{ij}\rvert\le G_{d,n}(M)\le M^2/128`$ | Original finite $n\times d$ array, $n\le d\le8$, $2^{-896}\le M\le2^{900}$, row energies $\le M^2/2$, $AA^T\succeq(M^2/8)I$; no run or intermediate profile assumption |
 | `factorMaterializationAccuracy` | Dense $LL^T$ formation error at most $n2^{-50}M$; checked output is valid | Valid retained factor, $1\le n\le32$, finite storage, Gram dot-product mass $\le M$, $2^{-1022}\le M\le2^{990}$ |
 
@@ -677,6 +678,18 @@ with its recursively defined budget. `nonexpansive_budget` proves the linear
 allowance $e_0+t\delta$ for $0\le L\le1$; no Kalman sensitivity constant is
 silently assumed.
 
+
+`FloatJosephSolve.factor_diagonal` and `solve_accuracy` discharge the actual
+LDLᵀ factorization and two substitution passes on diagonal coefficients in
+`[3/2,5]`, with finite RHS entries bounded by four. Output is finite, size four,
+and within `2^-40` per entry of the inverse of the **original decoded coefficient
+matrix** times the decoded RHS. A decoded diagonal RHS remains diagonal,
+including signed zeros. The proof uses FLARE substitution row equations and
+error bounds, with a sharper project proof of the diagonal factorization; it
+avoids the generic factorization allowance. Ninety-six native boundary/interior
+solves additionally check original-system residuals and zero preservation.
+This is a completed solver-stage theorem; composing gain accuracy and the
+full Joseph horizon remains outstanding.
 
 ### Retained factors and optional dense output
 

@@ -46,6 +46,8 @@ run_cmd do
       ``Kalman.Proofs.FloatJosephDomain.covariance_stages,
       ``Kalman.Proofs.FloatJosephDomain.stored_input_accuracy,
       ``Kalman.Proofs.FloatJosephDomain.stored_input_domain_nonempty,
+      ``Kalman.Proofs.FloatJosephSolve.factor_diagonal,
+      ``Kalman.Proofs.FloatJosephSolve.solve_accuracy,
       ``Kalman.Proofs.FloatSolveError.solve_accuracy,
       ``Kalman.Proofs.FloatResidualError.choleskyDiagonal_accuracy,
       ``Kalman.Proofs.FloatCholeskySolve.solve_accuracy,
