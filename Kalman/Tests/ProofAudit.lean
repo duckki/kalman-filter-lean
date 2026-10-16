@@ -20,7 +20,10 @@ run_cmd do
         if (`Kalman.Proofs).isPrefixOf userName then
           count := count + 1
       | _ => pure ()
-  for required in #[``Kalman.Proofs.UncertaintyBounds.diagonal_overbound,
+  for required in #[``Kalman.Proofs.JosephGainSensitivity.gainDifference,
+      ``Kalman.Proofs.JosephGainSensitivity.optimalOverbound,
+      ``Kalman.Proofs.JosephGainSensitivity.quadratic_accuracy,
+      ``Kalman.Proofs.UncertaintyBounds.diagonal_overbound,
       ``Kalman.Proofs.UncertaintyBounds.interval_transfer,
       ``Kalman.Proofs.FloatJosephUncertainty.horizon_overbound,
       ``Kalman.Proofs.FloatJosephUncertainty.horizon_interval,

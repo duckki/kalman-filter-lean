@@ -2478,3 +2478,24 @@ allowance: an ideal interval with multiplier k >= 0 transfers to radius
 endpoints are Real expressions; no rounded square-root or endpoint evaluator
 is certified by this result. The diagonal operating restrictions remain those
 of `FullyObservedDiagonalJosephAccuracy.HorizonDomain`.
+
+## General matrix Joseph gain sensitivity
+
+`JosephGainSensitivity.gain_difference` proves the standard completion of the
+square in arbitrary state and observation dimensions:
+
+`J(K) - J(K*) = (K-K*) S (K-K*)^T`.
+
+The original prior is positive semidefinite and measurement noise is positive
+definite, so the innovation S is positive definite and the exact optimal gain
+K* is well defined. `optimal_overbound` proves that this difference is PSD.
+`quadratic_accuracy` derives the entrywise radius `m^2 * Smax * epsilon^2`
+when gain entries differ by at most epsilon and innovation entries are bounded
+by Smax. The coefficient has no linear gain-error term. This sharpens the
+previous generic perturbation estimate near the optimal gain and extends the
+existing scalar identity beyond diagonal models.
+
+These are exact matrix results, not claims that the rounded native output is
+conservative. Native Joseph evaluation, gain formation, and prediction errors
+remain separate allowances. Completion of the square is classical mathematics;
+the contribution here is its completed proof and use in native certificates.

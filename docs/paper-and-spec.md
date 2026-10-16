@@ -1178,3 +1178,13 @@ and ideal interval coverage; its proofs and the original-input horizon bridge
 are in `Proofs/UncertaintyBounds` and `Proofs/FloatJosephUncertainty`. Statistical
 coverage remains a caller premise. Square roots and interval endpoints in the
 transfer theorem are exact Real operations, not an executable interval API.
+
+### Matrix Joseph gain perturbation
+
+`Definitions/Theorems/JosephGainSensitivity` specifies exact completion of the
+square and its semidefinite-order consequence. `Proofs/JosephGainSensitivity`
+proves both for arbitrary dimensions from the already established innovation
+invertibility and stationarity identities. Its entrywise quadratic allowance
+is `m^2 * Smax * epsilon^2`. It compares two exact Joseph evaluations with the
+same original prior/noise/observation and the exact optimal gain as reference;
+it does not absorb native evaluation error or imply native conservatism.
