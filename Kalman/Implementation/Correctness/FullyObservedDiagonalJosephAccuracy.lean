@@ -1,0 +1,53 @@
+import Kalman.Implementation.CovarianceFilter
+import Kalman.Implementation.Correctness.InputInterpretation
+
+/-! Dense-state invariants and completed native direct-Joseph guarantees.
+The exact reference always interprets the original finite input words. -/
+
+namespace Kalman.Implementation.Correctness.FullyObservedDiagonalJosephAccuracy
+
+open Kalman.Definitions
+open Kalman.Implementation.Correctness.InputInterpretation
+open Kalman.Definitions.Theorems.RecursionSensitivity
+open Flare.Binary64.Value
+
+noncomputable section
+
+/-! ----------------------------------------------------------------------
+## Dense native operating invariant
+-------------------------------------------------------------------------- -/
+
+/-- Storage bounds propagated by native direct-Joseph filtering. Positivity
+concerns the returned dense array itself, with no symmetry repair or Gram
+reinterpretation. Proof witness for positivity:
+`Kalman.Proofs.FloatJosephUpdate.invariant_positive`. -/
+structure StateInvariant (current : Input.State) : Prop where
+  mean_size : current.mean.size = 2
+  covariance_size : current.covariance.size = 4
+  mean_finite : current.mean.all Float.isFinite = true
+  covariance_finite : current.covariance.all Float.isFinite = true
+  diagonal : DecodedDiagonal 2 current.covariance
+  covariance_floor : ∀ i, (7 : ℝ) / 16 ≤ matrix 2 2 current.covariance i i
+  covariance_cap : ∀ i, matrix 2 2 current.covariance i i ≤ (13 : ℝ) / 8
+  mean_bound : ∀ i, i < 2 → |value (current.mean.getD i 0.0)| ≤ (9 : ℝ) / 8
+
+/-! ----------------------------------------------------------------------
+## Completed correction guarantee
+-------------------------------------------------------------------------- -/
+
+/-- Successful complete native Joseph correction, invariant output, and local
+covariance/mean errors at most 2^-33 against the optimal-gain Real update of
+the same original decoded prior and original model words. The witness derives
+gain formation, residual/mean arithmetic, and covariance evaluation from its
+original stored-input domain; no intermediate execution is a domain premise.
+This is a local correction result, separately from prediction and horizons.
+Proof witness: `Kalman.Proofs.FloatJosephUpdate.update_accuracy`. -/
+def CorrectionAccuracy (input : Input.Model) (prior output : Input.State) : Prop :=
+  CovarianceFilter.updateUnchecked .joseph input prior = .ok output
+  ∧ StateInvariant output
+  ∧ StateWithin ((2 : ℝ) ^ (-33 : Int)) ((2 : ℝ) ^ (-33 : Int)) (state 2 output)
+      (CovarianceRecursion.update .joseph (model (atDimensions 2 2 input)) (state 2 prior)
+        (vector 2 input.measurement))
+
+end
+end Kalman.Implementation.Correctness.FullyObservedDiagonalJosephAccuracy

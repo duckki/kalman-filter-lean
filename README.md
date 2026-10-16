@@ -53,7 +53,8 @@ mean equivalence are also proved. See [the sources and specification](docs/paper
   $1/2$, the rounded dense result has diagonal floor $1/8$ and is positive
   definite, including for nonoptimal gains. The gain prefix also has an original-input
   error bound $2^{-36}$ on the reached fully observed diagonal domain. Complete
-  filter accuracy remains a separate obligation.
+  correction covariance/mean errors are at most $2^{-33}$, with a restored dense
+  state invariant. Prediction and horizon accuracy remain separate obligations.
 - **QR square-root:** Stores a lower triangular covariance factor $L$ with
   positive diagonal, denoting covariance $LL^T$. It uses QR for prediction,
   innovation, and a factored Joseph correction, with triangular solves for the

@@ -23,6 +23,7 @@ import Kalman.Implementation.Correctness.InputInterpretation
 -- Main native implementation guarantees.
 import Kalman.Implementation.Correctness.CovarianceCounterexamples
 import Kalman.Implementation.Correctness.JosephCovarianceEvaluation
+import Kalman.Implementation.Correctness.FullyObservedDiagonalJosephAccuracy
 import Kalman.Implementation.Correctness.SquareRootFilterProperties
 import Kalman.Implementation.Correctness.CorrelatedNoiseFilterAccuracy
 import Kalman.Implementation.Correctness.FullyObservedDiagonalFilterAccuracy
@@ -44,6 +45,7 @@ import Kalman.Proofs.FloatJosephDomain
 import Kalman.Proofs.FloatJosephSolve
 import Kalman.Proofs.FloatJosephStructure
 import Kalman.Proofs.FloatJosephGain
+import Kalman.Proofs.FloatJosephUpdate
 import Kalman.Proofs.FloatUnderflow
 import Kalman.Proofs.FloatResidualError
 import Kalman.Proofs.FloatCholeskySolve

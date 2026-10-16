@@ -381,8 +381,22 @@ Joseph variance is at least `1/4`; diagonal preservation through every rounded
 operation and the `2^-34` entrywise error imply a retained floor of `1/8` and
 positive definiteness. These floors are project margins, not source constants.
 The proof concerns the returned dense array directly, with no symmetry repair
-or assumption that a rounded Gram is positive. Full gain and horizon accuracy
-remain separate obligations.
+or assumption that a rounded Gram is positive. Computed-gain correction accuracy is discharged below; prediction and
+accumulated horizon accuracy remain separate obligations.
+
+The complete `FloatJosephUpdate.update_accuracy` correction adds original
+prior mean magnitude `19/16` and measurement magnitude one to the gain domain.
+It composes actual gain/residual/mean stages and the covariance kernel, compares
+with the exact optimal-gain update of the same stored incoming prior, and bounds
+both covariance and mean errors by `2^-33`. The quadratic Joseph gain-error
+identity charges at most `2^-50` for gain perturbation; mean gain perturbation
+is charged linearly with residual magnitude at most three. The returned dense
+covariance is diagonal with entries `[7/16,13/8]`, and returned mean magnitude
+is at most `9/8`. These are propagated native storage conditions, not assumed
+output errors. Finiteness, shapes, and positivity are proved without repairing
+symmetry or reinterpreting a rounded dense covariance as an exact Gram.
+Prediction and accumulated trajectory errors remain separate from this local
+correction theorem.
 
 ## Authoritative decoded input contract
 
