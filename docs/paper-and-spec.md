@@ -1285,3 +1285,31 @@ certificate for arbitrary correlated initial covariances or arbitrary sensor
 scales. A 1,024-step varying-measurement regression checks all covariance-word
 prefixes and nine independently propagated Fraction references. The original-
 input accumulated horizon comparison is a separate result.
+
+### Original-input coupled tracking horizon
+
+`Implementation/Correctness/ConstantVelocityTracking.HorizonDomain` states
+only original conditions: the initial stored covariance/mean envelope, finite
+original measurement words with absolute value at most `2^-24`, and a horizon
+of at most `2^20`. `Proofs/FloatConstantVelocityHorizon.horizon_accuracy`
+proves checked execution at every prefix, the preserved native envelope, and
+error against `InputInterpretation.exactRun` from the original decoded initial
+state and the complete original input sequence. The ideal reference is never
+restarted from a native intermediate state.
+
+Covariance error is exactly zero in this steady-covariance dyadic family.
+Weighted mean error is at most `t * 2^-36` for position and four times that
+for velocity. The public `StateWithin` comparison uses the componentwise cap
+`4*t*2^-36`, at most `2^-14` over the permitted horizon. Both stored and ideal
+covariances retain the same correlated matrix; every native prefix is positive
+definite with floor `1/4`. The original-input domain is proved inhabited even
+at the maximum permitted horizon. The 1,024-step independent Fraction trace
+and actual checked runtime driver from the preceding slice exercise this
+same recurrence.
+
+This closes a finite-horizon certificate with real position/velocity coupling
+and position-only measurements. The horizon's fixed covariance, fixed noise
+and time increment, and small normalized measurement envelope remain explicit
+restrictions. Physically calibrated units, nonstationary covariance envelopes,
+and tighter accumulated bounds are separate application work; no statistical
+coverage or measured sensor performance follows from this arithmetic theorem.

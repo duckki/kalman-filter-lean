@@ -1,8 +1,10 @@
 """Original-binary64-word Fraction references for coupled prediction.
 
-Run this file to regenerate the Lean reference rows. All arithmetic preceding
-the final reference conversion is rational and independent of the dense kernel.
+Run this file to regenerate prediction rows, or pass --tracking for tracking
+rows. All arithmetic preceding final conversion is rational and independent
+of the dense kernel.
 """
+import argparse
 from fractions import Fraction as F
 
 
@@ -36,5 +38,8 @@ def tracking_references():
 
 
 if __name__ == '__main__':
-    for row in references():
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument('--tracking', action='store_true', help='emit tracking checkpoints')
+    args = parser.parse_args()
+    for row in tracking_references() if args.tracking else references():
         print('  #[' + ', '.join(format(float(v), '.17g') for v in row) + '],')
