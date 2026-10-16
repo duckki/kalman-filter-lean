@@ -50,6 +50,9 @@ mean equivalence are also proved. See [the sources and specification](docs/paper
   are at most $2^{-30}$ / $2^{-29}$ against an independent original-input Real
   trajectory. A broader local covariance-kernel certificate gives $2^{-34}$
   error at supplied stored gains, including nonoptimal gains.
+  A separate checked correction supports correlated priors with one position
+  observation: mean/covariance errors are at most $2^{-28}$, with bounded
+  asymmetry and a certified positive floor for the exact symmetric part.
 - **QR square-root:** Stores a lower triangular covariance factor $L$ with
   positive diagonal, denoting covariance $LL^T$. It uses QR for prediction,
   innovation, and a factored Joseph correction, with triangular solves for the

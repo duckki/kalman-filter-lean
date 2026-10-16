@@ -112,3 +112,4 @@ import Kalman.Proofs.FloatObservableHorizon
 import Kalman.Proofs.FloatObservableDenseOutput
 import Kalman.Proofs.FloatJosephUncertainty
 import Kalman.Proofs.JosephGainSensitivity
+import Kalman.Proofs.FloatJosephPositionCorrection

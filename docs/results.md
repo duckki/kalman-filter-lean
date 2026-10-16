@@ -2499,3 +2499,52 @@ These are exact matrix results, not claims that the rounded native output is
 conservative. Native Joseph evaluation, gain formation, and prediction errors
 remain separate allowances. Completion of the square is classical mathematics;
 the contribution here is its completed proof and use in native certificates.
+
+## Correlated prior with one position observation
+
+`FloatJosephPositionCorrection.update_accuracy` certifies the unchanged checked
+native `CovarianceFilter.update .joseph` with two states and one measurement.
+The observation words are `[1, 0]`: only the first (position) component is
+observed. The original prior can be correlated; the domain does not require
+it, the gain, or the posterior to be diagonal.
+
+The public domain is `Implementation.Correctness.JosephPositionCorrection.Domain`:
+
+- Original model validation passes (dimensions, storage, finite inputs, and
+  noise symmetry only); state/measurement dimensions are 2/1 and all relevant
+  original arrays have their stated sizes and finite entries.
+- Original prior satisfies `P - (1/2) I >= 0` and every covariance entry has
+  magnitude at most 2. This condition includes original symmetry.
+- Scalar measurement variance is in `[1, 3/2]`; original mean components and
+  the scalar observation have magnitude at most 1.
+
+The certificate derives, rather than assumes, all native products, sums, the
+scalar innovation pivot, both LDL solution divisions, residual, mean, and the
+full Joseph covariance evaluation. Gain entries differ from the original-input
+optimal gain by at most `2^-36`. The covariance kernel's error at the same
+stored gain is at most `2^-32`. General matrix quadratic gain sensitivity then
+supplies the separate gain-design allowance. Final covariance-entry and
+mean-component errors are each at most `2^-28` against the optimal Real
+correction of the same original stored prior and model words.
+
+Symmetry is explicit. The implementation performs no mirroring or averaging.
+The returned covariance has asymmetry at most `2^-27` entrywise, and its exact
+symmetric part `(P_hat + P_hat^T)/2` has floor `1/8 I`. This is a positive
+quadratic-form guarantee, not a claim of Mathlib `PosDef` for a possibly
+nonsymmetric stored array. `JosephPositionCorrection.covariance_floor` proves
+the ideal `1/4 I` margin at any supplied gain; the native entrywise allowance
+pays for the reduced floor. Taking the exact symmetric part introduces no
+extra entrywise error. No native symmetric-part evaluator is asserted.
+
+`domain_nonempty` gives a concrete prior with off-diagonal covariance `1/8`.
+The native suite checks 72 boundary/correlation/non-dyadic combinations against
+`JosephPositionReference.py`, which starts from exact rational interpretations
+of each original binary64 word and rounds only the final reference outputs.
+
+This is a local correction certificate on a normalized, well-conditioned
+family. It does not certify prediction, domain preservation, a repeated
+position/velocity trajectory, severe noise/prior scale separation, or a
+particular physical sensor. The existing diagonal Joseph horizon theorem
+remains a separate result. The earlier diagonal inflation helper's allowance
+is tied to that horizon's smaller covariance budget; it is not automatically
+an uncertainty allowance for this new local domain.

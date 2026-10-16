@@ -1188,3 +1188,26 @@ invertibility and stationarity identities. Its entrywise quadratic allowance
 is `m^2 * Smax * epsilon^2`. It compares two exact Joseph evaluations with the
 same original prior/noise/observation and the exact optimal gain as reference;
 it does not absorb native evaluation error or imply native conservatism.
+
+### Position-only Joseph correction envelope
+
+Project specialization of the existing linear observation/update equations:
+two state components (position and velocity), one observation, and original
+observation storage exactly `[1, 0]`. `Definitions/Theorems/JosephPositionCorrection`
+records the position row, exact symmetric-part interpretation, and an exact
+quantitative Joseph floor. The original stored prior can be correlated.
+`Implementation/Correctness/JosephPositionCorrection` states the normalized
+original-input envelope and the complete checked local guarantee. The prior
+floor is an original mathematical premise; model validation only supplies the
+existing storage/finite/noise-symmetry checks and assumes no filter execution.
+
+`Proofs/FloatJosephPositionArithmetic`, `FloatJosephPositionGain`,
+`FloatJosephPositionKernel`, `FloatJosephPositionMean`, and
+`FloatJosephPositionCorrection` discharge all actual rectangular native
+arithmetic stages. The scalar innovation uses the existing unchanged LDL
+solver. There is no new gain algorithm or covariance symmetry repair. Its
+comparator uses the optimal exact gain from the same original finite words.
+The output's exact symmetric part has a certified floor, while raw output
+asymmetry is bounded separately. This interpretation does not claim exact
+stored symmetry. The theorem is local, with explicit conditioning/scale bounds;
+no physically calibrated sensor or prediction/horizon extension is implied.
