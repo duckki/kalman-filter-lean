@@ -2455,3 +2455,26 @@ separate native Joseph evaluation, plus the exact retained signed-zero reset
 fixture. The trace driver is also checked for propagation of a rejected prefix.
 This executable agreement supplements the proofs; it does not itself
 discharge the 400-step Real operand domain or certify a sharper tolerance.
+
+## Joseph uncertainty transfer
+
+`UncertaintyBounds.diagonal_overbound` turns the completed diagonal entrywise
+covariance error into semidefinite order: adding epsilon to each native diagonal
+bounds the ideal covariance. `interval_transfer` also charges the mean error
+when transferring any externally justified ideal scalar uncertainty interval.
+It does not establish statistical coverage or validate a noise model.
+
+The optional runtime `UncertaintyInflation.inflateVariance` adds exactly
+`2^-29` and checks finiteness. `FloatJosephUncertainty.inflate_variance` proves
+that, on the completed Joseph invariant range, its rounded result bounds any
+reference variance within `2^-30` of the input. The addition error is at most
+`2^-51`; the extra padding pays for that rounding. The total added allowance
+is at most `2^-28`. The filter's stored covariance is not modified.
+
+`horizon_overbound` derives these executable allowances at every original-input
+Joseph prefix. `horizon_interval` combines them with the uniform `2^-29` mean
+allowance: an ideal interval with multiplier k >= 0 transfers to radius
+`2^-29 + k * sqrt(inflatedVariance)` about the native mean. This radius and its
+endpoints are Real expressions; no rounded square-root or endpoint evaluator
+is certified by this result. The diagonal operating restrictions remain those
+of `FullyObservedDiagonalJosephAccuracy.HorizonDomain`.

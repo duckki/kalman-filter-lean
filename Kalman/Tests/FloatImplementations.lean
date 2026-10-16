@@ -1,4 +1,5 @@
 import Kalman.Implementation.CovarianceFilter
+import Kalman.Implementation.UncertaintyInflation
 import Kalman.Implementation.SquareRootFilter
 
 /-!
@@ -31,6 +32,20 @@ def close (a b : Array Float) (tolerance : Float := 1.0e-11) : Bool :=
 
 def scalar (h r q : Float) : Model :=
   ⟨1, 1, #[1.0], #[h], #[q], #[r], #[2.0]⟩
+
+def uncertaintyInflationChecks : IO Unit := do
+  for variance in [0.4375, Float.ofBits 0x3fefffffffffffff, 1.0, 1.625] do
+    let upper ←
+      requireOk (UncertaintyInflation.inflateVariance variance) "variance allowance"
+    check (upper.isFinite && upper > variance) "finite strictly inflated variance"
+    check (upper - variance ≥ 0.000000000931322574615478515625)
+      "allowance survives rounding across a binade"
+  let overflow := Float.ofBits 0x7ff0000000000000
+  check
+    (match UncertaintyInflation.inflateVariance overflow with
+      | .error .nonfiniteComputation => true
+      | _ => false)
+    "nonfinite inflated variance rejected"
 
 def scalarChecks : IO Unit := do
   let input := scalar 1.0 1.0 1.0
@@ -3540,6 +3555,7 @@ def run : IO Unit := do
   josephComputedGainChecks
   josephCompleteUpdateChecks
   josephCompleteStepChecks
+  uncertaintyInflationChecks
   josephCertifiedHorizonChecks
   negativeVarianceChecks
   repeatedNegativeChecks

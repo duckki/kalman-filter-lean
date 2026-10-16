@@ -1166,3 +1166,15 @@ off-diagonal word agreement supplies Hermitian decoding without symmetry repair.
 A 108-case larger-mean/signed-zero grid and dense floor checks at all 257
 near-identity regression prefixes supplement the kernel proofs. The complete
 initialized fully observed diagonal native filter milestone is now closed.
+
+### Optional Joseph uncertainty allowance
+
+Project adaptation: `Implementation/UncertaintyInflation` offers one checked
+binary64 addition of exactly `2^-29`. It is observational and does not alter
+the filter recurrence. The completed diagonal Joseph covariance radius is
+`2^-30`; the extra margin covers the allowance addition's own `2^-51` error.
+`Definitions/Theorems/UncertaintyBounds` states deterministic covariance order
+and ideal interval coverage; its proofs and the original-input horizon bridge
+are in `Proofs/UncertaintyBounds` and `Proofs/FloatJosephUncertainty`. Statistical
+coverage remains a caller premise. Square roots and interval endpoints in the
+transfer theorem are exact Real operations, not an executable interval API.

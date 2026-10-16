@@ -20,7 +20,11 @@ run_cmd do
         if (`Kalman.Proofs).isPrefixOf userName then
           count := count + 1
       | _ => pure ()
-  for required in #[``Kalman.Proofs.RealRecursion.stepPositiveDefinite,
+  for required in #[``Kalman.Proofs.UncertaintyBounds.diagonal_overbound,
+      ``Kalman.Proofs.UncertaintyBounds.interval_transfer,
+      ``Kalman.Proofs.FloatJosephUncertainty.horizon_overbound,
+      ``Kalman.Proofs.FloatJosephUncertainty.horizon_interval,
+      ``Kalman.Proofs.RealRecursion.stepPositiveDefinite,
       ``Kalman.Proofs.RealRecursion.covarianceFormulationsAgree,
       ``Kalman.Proofs.RealRecursion.josephPositiveDefinite,
       ``Kalman.Proofs.RealRecursion.informationFormAgrees,
