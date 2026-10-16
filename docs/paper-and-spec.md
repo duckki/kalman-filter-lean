@@ -398,6 +398,18 @@ symmetry or reinterpreting a rounded dense covariance as an exact Gram.
 Prediction and accumulated trajectory errors remain separate from this local
 correction theorem.
 
+`FloatJosephPrediction` charges both native dense covariance products and Q
+addition, with product mass eight and sum exponent two. On the dense invariant
+and shared original full-observation model domain, prediction covariance/mean
+errors are `2^-42/2^-46`; returned variances `[15/16,13/4]` and mean magnitude
+`19/16` discharge the complete correction domain. `FloatJosephFilter.step_accuracy`
+includes the actual public model/state validation and all native prediction/
+correction stages, preserves the dense invariant, and bounds both local errors
+by `2^-32` against an exact full step from the same incoming stored state.
+Exact correction sensitivity propagates the prediction discrepancy through
+the optimal gain and mean; it is not omitted. The step result is complete,
+while independent accumulated trajectory accuracy remains separate.
+
 ## Authoritative decoded input contract
 
 `Definitions/Input.Model` owns the one native input format. It contains state

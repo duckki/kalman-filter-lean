@@ -2298,6 +2298,211 @@ def josephCompleteUpdateChecks : IO Unit := do
               index := index + 1
   check (index == references.size) "Joseph correction oracle coverage"
 
+/-- Checked dense prediction and complete Joseph steps against exact-rational
+original-word references, including invariant boundaries and non-dyadic words. -/
+def josephCompleteStepChecks : IO Unit := do
+  let cases : Array (Array Float) :=
+    #[
+      #[1, 1, 0.4375, 1.625, 1, 1.5, 1, 1.5, 1.125, -1.125, 1, -1],
+      #[-1, 1, 1.625, 0.4375, 1.5, 1, 1.5, 1, 1.125, -1.125, -1, 1],
+      #[0, -0, 0.4375, 1.625, 1, 1.5, 1, 1.5, -1.125, 1.125, 0, 1],
+      #[
+        0.33333333333333331,
+        -0.33333333333333331,
+        1.625,
+        0.4375,
+        1.25,
+        1.5,
+        1.25,
+        1.25,
+        1.125,
+        -1.125,
+        0.33333333333333331,
+        -0.33333333333333331
+      ],
+      #[
+        0.9990234375,
+        -1,
+        0.4375,
+        1.625,
+        1.5,
+        1,
+        1.5,
+        1,
+        0.33333333333333331,
+        -1.125,
+        -1,
+        0.5
+      ],
+      #[-0, 0.9990234375, 1.625, 1.625, 1, 1.25, 1.25, 1.5, -1.125, 1.125, 0, 1],
+      #[
+        -0.33333333333333331,
+        0.9990234375,
+        0.4375,
+        0.4375,
+        1.5,
+        1.5,
+        1,
+        1.5,
+        1.125,
+        -1.125,
+        1,
+        0
+      ],
+      #[1, -1, 1.625, 1.625, 1.5, 1.5, 1.5, 1.5, -1.125, 1.125, 1, -1]
+    ]
+  let references : Array (Array Float) :=
+    #[
+      #[
+        1.125,
+        -1.125,
+        1.4375,
+        0,
+        0,
+        3.125,
+        1.0512820512820513,
+        -1.0405405405405406,
+        0.58974358974358976,
+        0,
+        0,
+        1.0135135135135136
+      ],
+      #[
+        -1.125,
+        -1.125,
+        3.125,
+        0,
+        0,
+        1.4375,
+        -1.0405405405405406,
+        0.12820512820512819,
+        1.0135135135135136,
+        0,
+        0,
+        0.58974358974358976
+      ],
+      #[0, 0, 1, 0, 0, 1.5, 0, 0.5, 0.5, 0, 0, 0.75],
+      #[
+        0.375,
+        0.375,
+        1.4305555555555556,
+        0,
+        0,
+        1.5486111111111112,
+        0.35276338514680483,
+        -0.016956162117452437,
+        0.66709844559585496,
+        0,
+        0,
+        0.69168734491315131
+      ],
+      #[
+        0.3330078125,
+        1.125,
+        1.9366459250450134,
+        0,
+        0,
+        2.625,
+        -0.41817930553209082,
+        0.67241379310344829,
+        0.8452918778734736,
+        0,
+        0,
+        0.72413793103448276
+      ],
+      #[
+        0,
+        1.1239013671875,
+        1,
+        0,
+        0,
+        2.8718277215957642,
+        0,
+        1.0425112933575096,
+        0.55555555555555558,
+        0,
+        0,
+        0.98534111056445617
+      ],
+      #[
+        -0.375,
+        -1.1239013671875,
+        1.5486111111111112,
+        0,
+        0,
+        1.9366459250450134,
+        0.46049046321525888,
+        -0.49055156904450919,
+        0.60762942779291551,
+        0,
+        0,
+        0.8452918778734736
+      ],
+      #[
+        -1.125,
+        -1.125,
+        3.125,
+        0,
+        0,
+        3.125,
+        0.3108108108108108,
+        -1.0405405405405406,
+        1.0135135135135136,
+        0,
+        0,
+        1.0135135135135136
+      ]
+    ]
+  check (cases.size == references.size) "Joseph step oracle coverage"
+  for index in [:cases.size] do
+    let cfg := cases.getD index #[]
+    let expected := references.getD index #[]
+    check (cfg.size == 12 && expected.size == 12) "Joseph step fixture shape"
+    for zero in [0.0, -0.0] do
+      let input : Model :=
+        ⟨
+          2,
+          2,
+          #[cfg.getD 0 0.0, zero, zero, cfg.getD 1 0.0],
+          identity 2,
+          #[cfg.getD 4 0.0, zero, zero, cfg.getD 5 0.0],
+          #[cfg.getD 6 0.0, zero, zero, cfg.getD 7 0.0],
+          #[cfg.getD 10 0.0, cfg.getD 11 0.0]
+        ⟩
+      let initial : State :=
+        ⟨#[cfg.getD 8 0.0, cfg.getD 9 0.0], #[cfg.getD 2 0.0, zero, zero, cfg.getD 3 0.0]⟩
+      let prior ←
+        requireOk (CovarianceFilter.predict input initial) "Joseph bounded prediction"
+      check
+        (close prior.mean (expected.extract 0 2) 1.0e-14
+          && close prior.covariance (expected.extract 2 6) 1.0e-14)
+        "Joseph prediction exact-rational reference"
+      let output ←
+        requireOk (CovarianceFilter.step .joseph input initial) "Joseph checked full step"
+      check
+        (close output.mean (expected.extract 6 8) 1.0e-14
+          && close output.covariance (expected.extract 8 12) 1.0e-14)
+        "Joseph full-step exact-rational reference"
+      check (output.mean.all Float.isFinite && output.covariance.all Float.isFinite)
+        "Joseph full-step finiteness"
+      check
+        (prior.covariance.getD 1 1.0 == 0.0
+          && prior.covariance.getD 2 1.0 == 0.0
+          && output.covariance.getD 1 1.0 == 0.0
+          && output.covariance.getD 2 1.0 == 0.0)
+        "Joseph prediction/step diagonal storage"
+      for i in [:2] do
+        check
+          (0.9375 ≤ prior.covariance.getD (i * 2 + i) 0.0
+            && prior.covariance.getD (i * 2 + i) 0.0 ≤ 3.25
+            && (prior.mean.getD i 0.0).abs ≤ 1.1875)
+          "Joseph reached correction domain"
+        check
+          (0.4375 ≤ output.covariance.getD (i * 2 + i) 0.0
+            && output.covariance.getD (i * 2 + i) 0.0 ≤ 1.625
+            && (output.mean.getD i 0.0).abs ≤ 1.125)
+          "Joseph propagated dense invariant"
+
 /-- A reproducible binary64 one-step negative variance, with F=0 and Q=1 so
 the full-step predicted covariance is exactly one. This is not an accumulation example. -/
 def negativeVarianceChecks : IO Unit := do
@@ -3187,6 +3392,7 @@ def run : IO Unit := do
   josephDiagonalPositiveChecks
   josephComputedGainChecks
   josephCompleteUpdateChecks
+  josephCompleteStepChecks
   negativeVarianceChecks
   repeatedNegativeChecks
   filterHorizonChecks

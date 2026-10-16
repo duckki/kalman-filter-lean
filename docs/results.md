@@ -102,13 +102,14 @@ The complete witnesses are `FloatInputHorizon.initialized_horizon_accuracy`,
 
 ## Scope and trust
 
-The direct Joseph theorem below bounds its covariance-evaluation kernel at a
-supplied stored gain. It does not include prediction/gain error or prove a
-complete native Joseph horizon. Compact and subtractive have certified failure
-examples and shared arithmetic bounds, not the QR accuracy certificate.
+Direct Joseph now has a complete checked-step accuracy result on the fully
+observed diagonal domain, including prediction, computed gain, and mean error,
+as well as broader covariance-kernel bounds at supplied stored gains. Its
+accumulated horizon remains separate work. Compact and subtractive have
+certified failure examples and shared arithmetic bounds.
 
 General component theorems may use conditional profiles or successful runs;
-the two original-input filter domains discharge all of their reached premises.
+the original-input filter domains discharge all of their reached premises.
 The runtime API's larger dimension range is not a wider accuracy theorem.
 Tiny-factor underflow refutes unconditional PD of rounded dense Gram output.
 
@@ -294,9 +295,10 @@ Every error below is **absolute and entrywise**: the inequality holds for every
 matrix entry, or every visited array entry. $A,B,L,K$ denote exact Real decoding
 of the stored native arrays, not automatically the ideal filter's corresponding
 quantities. Correct storage shapes are explicit in the product and solve APIs;
-the Joseph statement concerns its covariance kernel with a supplied gain.
+the Joseph kernel statement uses a supplied stored gain; the complete-step
+statement also charges gain formation and prediction.
 
-| Public proof witness in `Kalman.Proofs.FloatErrorBounds` | Proved conclusion | Required domain and reference |
+| Public proof witness | Proved conclusion | Required domain and reference |
 | --- | --- | --- |
 | `matrixProductAccuracy` | $\lvert \widehat C_{ij}-(AB)_{ij}\rvert \le k2^{-50}M$; execution succeeds with finite, correctly shaped output | Finite stored operands; correct shapes; $k\le32$; every dot-product absolute term mass is at most $M$; $2^{-1022}\le M\le2^{990}$ |
 | `arraySumAccuracy` | Addition/subtraction error at most $2^{E-52}$; execution succeeds with finite output | Equal array sizes, finite operands, exact stored-operand result magnitude at most $2^E$, $-1022\le E\le1022$ |
@@ -311,6 +313,7 @@ the Joseph statement concerns its covariance kernel with a supplied gain.
 | `FloatJosephSolve.solve_accuracy` | Actual two-state LDLᵀ solve succeeds, is finite, preserves decoded diagonal RHS structure, and has entrywise forward error at most $2^{-40}$ against $A^{-1}B$ | Finite diagonal coefficients with entries in $[3/2,5]$ and finite RHS entries bounded by four; no intermediate execution premise |
 | `FloatJosephGain.gain_stages` | All native gain stages succeed; computed gain is finite and diagonal, has diagonal entries in $[3/8,13/16]$, and error at most $2^{-36}$ against original $P(P+R)^{-1}$ | Finite diagonal stored prior/noise, $H=I$, prior variances $[15/16,13/4]$, noise variances $[1,3/2]$; no intermediate execution or profile premise |
 | `FloatJosephUpdate.update_accuracy` | Complete computed-gain Joseph correction succeeds, restores the dense operating invariant, and has covariance/mean errors at most $2^{-33}$ against the exact optimal update of the same stored prior | Original two-state correction input bounds: prior variances $[15/16,13/4]$, prior mean magnitude $19/16$, noise variances $[1,3/2]$, $H=I$, measurement magnitude one; no intermediate run/profile premise |
+| `FloatJosephPrediction.prediction_accuracy` / `FloatJosephFilter.step_accuracy` | Native dense prediction has covariance/mean errors $2^{-42}/2^{-46}$ and reaches the correction domain; a complete checked step restores the invariant with both local errors at most $2^{-32}$ | Shared fully observed diagonal original model domain; incoming finite dense diagonal invariant with covariance entries $[7/16,13/8]$ and mean magnitude $9/8$ |
 | `FloatJosephStructure.stored_input_positive` | Rounded dense Joseph output is diagonal, finite, positive definite, has diagonal floor $1/8$, and retains the $2^{-34}$ evaluation bound | Stored-input domain above, $H=I$, decoded diagonal $P,R,K$, and prior/noise diagonal entries at least $1/2$; supplied gain may be nonoptimal |
 | `qrGramFactorInitialAccuracy` | Execution succeeds with finite lower-positive $L$; exact $LL^T\succeq(M^2/16)I$ is PD; $`\lvert(LL^T-AA^T)_{ij}\rvert\le G_{d,n}(M)\le M^2/128`$ | Original finite $n\times d$ array, $n\le d\le8$, $2^{-896}\le M\le2^{900}$, row energies $\le M^2/2$, $AA^T\succeq(M^2/8)I$; no run or intermediate profile assumption |
 | `factorMaterializationAccuracy` | Dense $LL^T$ formation error at most $n2^{-50}M$; checked output is valid | Valid retained factor, $1\le n\le32$, finite storage, Gram dot-product mass $\le M$, $2^{-1022}\le M\le2^{990}$ |
@@ -661,8 +664,8 @@ nonzero-observation, correlated-prior witness proves the domain is inhabited.
 
 This is a completed stored-gain covariance-evaluation result, not a complete
 Joseph filter certificate. The complete computed-gain correction and its output invariant are discharged
-separately below; prediction and accumulated independent-trajectory accuracy
-still need to be composed for the complete filter.
+separately below; the complete checked step is discharged below. Accumulated independent-trajectory
+accuracy remains separate.
 Sixty native cases compare against an independent exact-rational expanded
 Joseph polynomial in `Tests/JosephReference.py`; the `10^-14` regression
 tolerance is separate from the proved allowance. They include correlated
@@ -724,6 +727,24 @@ against the independent Fraction oracle `Tests/JosephUpdateReference.py` at
 prior/vector boundaries and both signed-zero encodings. This is a completed
 correction result; prediction and accumulated trajectory error are not assumed
 or silently included in its local allowances.
+
+`FloatJosephPrediction.prediction_accuracy` derives the actual dense FP/FPFᵀ,
+Q addition, and predicted mean from the shared original model bounds and the
+incoming dense invariant. Covariance/mean errors are at most `2^-42/2^-46`;
+native predicted covariance lies in `[15/16,13/4]`, and mean magnitude is at
+most `19/16`. Every correction-domain condition follows from original storage.
+`FloatJosephFilter.step_accuracy` then includes the actual model/state guards,
+prediction, and complete correction, and restores the same dense invariant.
+Its covariance and mean errors are both at most `2^-32` against the exact full
+step of the same decoded incoming state. Real correction sensitivity charges
+prediction error through the changed gain (`2/5` covariance coefficient and
+`8/13`, `17/30` mean coefficients); it is not discarded when composing stages.
+The completed public statement is `FullyObservedDiagonalJosephAccuracy.StepAccuracy`.
+Sixteen checked prediction/full-step cases compare with the independent
+`Tests/JosephStepReference.py` oracle, covering invariant boundaries, resets,
+unit/sign-reversing dynamics, non-dyadic words, and signed zeros. Independent
+accumulated trajectory error is separate from this complete local-step theorem.
+
 
 
 

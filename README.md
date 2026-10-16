@@ -54,7 +54,8 @@ mean equivalence are also proved. See [the sources and specification](docs/paper
   definite, including for nonoptimal gains. The gain prefix also has an original-input
   error bound $2^{-36}$ on the reached fully observed diagonal domain. Complete
   correction covariance/mean errors are at most $2^{-33}$, with a restored dense
-  state invariant. Prediction and horizon accuracy remain separate obligations.
+  state invariant. Complete checked-step covariance/mean errors are at most
+  $2^{-32}$, including prediction. Accumulated horizon accuracy remains separate.
 - **QR square-root:** Stores a lower triangular covariance factor $L$ with
   positive diagonal, denoting covariance $LL^T$. It uses QR for prediction,
   innovation, and a factored Joseph correction, with triangular solves for the

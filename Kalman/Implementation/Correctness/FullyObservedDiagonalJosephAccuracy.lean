@@ -49,5 +49,22 @@ def CorrectionAccuracy (input : Input.Model) (prior output : Input.State) : Prop
       (CovarianceRecursion.update .joseph (model (atDimensions 2 2 input)) (state 2 prior)
         (vector 2 input.measurement))
 
+/-! ----------------------------------------------------------------------
+## Completed checked full-step guarantee
+-------------------------------------------------------------------------- -/
+
+/-- Complete checked native direct-Joseph step, invariant output, and local
+covariance/mean errors at most 2^-32 against the exact full step of the same
+incoming stored state. This includes prediction rounding propagated through
+the changed gain. Original model and incoming invariant conditions are
+sufficient; no intermediate success or desired output error is assumed.
+Proof witness: `Kalman.Proofs.FloatJosephFilter.step_accuracy`. -/
+def StepAccuracy (input : Input.Model) (current output : Input.State) : Prop :=
+  Kalman.Implementation.CovarianceFilter.step .joseph input current = .ok output
+  ∧ StateInvariant output
+  ∧ StateWithin ((2 : ℝ) ^ (-32 : Int)) ((2 : ℝ) ^ (-32 : Int)) (state 2 output)
+      (CovarianceRecursion.step .joseph (model (atDimensions 2 2 input)) (state 2 current)
+        (vector 2 input.measurement))
+
 end
 end Kalman.Implementation.Correctness.FullyObservedDiagonalJosephAccuracy
