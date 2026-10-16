@@ -1,4 +1,5 @@
 import Kalman.Implementation.CovarianceFilter
+import Kalman.Implementation.PositionVelocityModel
 import Kalman.Implementation.SymmetricJosephFilter
 import Kalman.Implementation.UncertaintyInflation
 import Kalman.Implementation.SquareRootFilter
@@ -723,6 +724,141 @@ def correlatedTransientChecks : IO Unit := do
           requireOk (SymmetricJosephFilter.step (constantVelocityTrackingInput t) current)
             "nonstationary checked tracking step"
   check (index == 12) "all transient reference checkpoints exercised"
+
+def robustTransientReference : Array (Array Float) :=
+  #[
+    #[0.125, -0.5, 0.499755859375, 0.25, 0.25, 0.999755859375],
+    #[
+      1.4902320949751159e-07,
+      -0.50000004470378201,
+      0.49993514174899883,
+      0.25000166919745137,
+      0.25000166919745137,
+      0.99976992601103976
+    ],
+    #[
+      -0.06250254519005867,
+      -0.4687522777345759,
+      0.49998051759909412,
+      0.24998217302687956,
+      0.24998217302687956,
+      0.99979321808448307
+    ],
+    #[
+      -0.097904758010567611,
+      -0.37488967726001565,
+      0.49999126561616042,
+      0.24996801440673708,
+      0.24996801440673708,
+      0.99986006825238227
+    ],
+    #[
+      -0.070202874919972777,
+      -0.20764808016785147,
+      0.49999536302331993,
+      0.24998528036185638,
+      0.24998528036185638,
+      0.99995524226116905
+    ],
+    #[
+      -0.020219484664992335,
+      -0.056408113000470599,
+      0.49999988092268627,
+      0.24999900426083274,
+      0.24999900426083274,
+      0.99999709156806027
+    ],
+    #[0.125, -0.5, 0.500244140625, 0.25, 0.25, 1.000244140625],
+    #[
+      1.4900001738743041e-07,
+      -0.50000004470309989,
+      0.50006484142910812,
+      0.24999785446010378,
+      0.24999785446010378,
+      1.0002295971370507
+    ],
+    #[
+      -0.062497653891050491,
+      -0.4687477794280227,
+      0.50001964808907684,
+      0.25001815943316752,
+      0.25001815943316752,
+      1.0002071201884262
+    ],
+    #[
+      -0.097896145223476311,
+      -0.37486596195812805,
+      0.5000093310012178,
+      0.25003232996431562,
+      0.25003232996431562,
+      1.0001405944225941
+    ],
+    #[
+      -0.070190756557075906,
+      -0.2076127637686247,
+      0.50000525628693149,
+      0.25001512214050675,
+      0.25001512214050675,
+      1.0000456239352569
+    ],
+    #[
+      -0.020214966293914262,
+      -0.056395511436797635,
+      0.50000074827741259,
+      0.25000142692463317,
+      0.25000142692463317,
+      1.0000038585288238
+    ],
+  ]
+
+def robustTrackingInput (t : Nat) : Model :=
+  let theta := 0.000000476837158203125
+  let p : Kalman.Implementation.PositionVelocityModel.Parameters :=
+    match t % 4 with
+    | 0 => ⟨0.25 - theta, 0.3125 + theta, 0.125 - theta, 1.0⟩
+    | 1 => ⟨0.25 + theta, 0.3125 - theta, 0.125 + theta, 1.0 + theta⟩
+    | 2 => ⟨0.25, 0.3125, 0.125, 1.0 + theta⟩
+    | _ => ⟨0.25 + theta, 0.3125 + theta, 0.125 + theta, 1.0⟩
+  Kalman.Implementation.PositionVelocityModel.input p
+    (constantVelocityTrackingInput t).measurement[0]!
+
+def robustTrackingChecks : IO Unit := do
+  let checkpoints := #[0, 1, 2, 4, 8, 16]
+  let mut index := 0
+  for sign in [-1.0, 1.0] do
+    let e := 0.000244140625
+    let initial : State := ⟨#[0.125, -0.5], #[0.5 + sign * e, 0.25, 0.25, 1.0 + sign * e]⟩
+    let mut current := initial
+    let mut checkpoint := 0
+    for t in [:17] do
+      let d0 := current.covariance[0]! - 0.5
+      let d1 := current.covariance[1]! - 0.25
+      let d2 := current.covariance[3]! - 1.0
+      for side in [-1.0, 1.0] do
+        let a := e * (75.0 / 47.0) + side * d0
+        let b := e * (40.0 / 47.0) + side * d1
+        let c := e * (272.0 / 47.0) + side * d2
+        check (a > 0.0 && c > 0.0 && a * c - b * b > 0.0)
+          "varying parameters preserve the native covariance neighborhood"
+      if checkpoint < checkpoints.size && t == checkpoints[checkpoint]! then
+        check
+          (close (current.mean ++ current.covariance) robustTransientReference[index]!
+            1.0e-12)
+          "independent varying-parameter original-word reference"
+        checkpoint := checkpoint + 1
+        index := index + 1
+      if t < 16 then
+        current ←
+          requireOk (SymmetricJosephFilter.step (robustTrackingInput t) current)
+            "checked varying-parameter transient step"
+    let driven ←
+      requireOk (SymmetricJosephFilter.run robustTrackingInput initial 16)
+        "checked varying-parameter driver"
+    check
+      (driven.mean.map Float.toBits == current.mean.map Float.toBits
+        && driven.covariance.map Float.toBits == current.covariance.map Float.toBits)
+      "varying-parameter driver retained words"
+  check (index == 12) "all varying-parameter reference checkpoints exercised"
 
 def scalarChecks : IO Unit := do
   let input := scalar 1.0 1.0 1.0
@@ -4238,6 +4374,7 @@ def run : IO Unit := do
   constantVelocityPredictionChecks
   constantVelocityTrackingChecks
   correlatedTransientChecks
+  robustTrackingChecks
   josephCertifiedHorizonChecks
   negativeVarianceChecks
   repeatedNegativeChecks

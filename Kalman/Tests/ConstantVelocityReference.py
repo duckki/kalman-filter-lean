@@ -37,7 +37,7 @@ def tracking_references():
         a, b, c = aa / s, bb / s, cc - bb * bb / s
 
 
-def transient_references():
+def transient_references(robust=False):
     """Nonstationary covariance, using exact original-word scalar equations."""
     for sign in [-1, 1]:
         p, v = F(1, 8), F(-1, 2)
@@ -48,19 +48,27 @@ def transient_references():
                 yield [p, v, a, b, b, c]
             if t == 16:
                 break
-            pp, vv = p + v / 4, v
-            aa, bb, cc = a + b / 2 + c / 16 + F(5, 16), b + c / 4, c + F(1, 8)
-            s = aa + 1
+            theta = F(1, 2**21)
+            choices = [(F(1, 4)-theta, F(5, 16)+theta, F(1, 8)-theta, F(1)),
+                       (F(1, 4)+theta, F(5, 16)-theta, F(1, 8)+theta, F(1)+theta),
+                       (F(1, 4), F(5, 16), F(1, 8), F(1)+theta),
+                       (F(1, 4)+theta, F(5, 16)+theta, F(1, 8)+theta, F(1))]
+            dt, q0, q1, rr = choices[t % 4] if robust else (F(1, 4), F(5, 16), F(1, 8), F(1))
+            pp, vv = p + dt * v, v
+            aa, bb, cc = a + 2 * dt * b + dt * dt * c + q0, b + dt * c, c + q1
+            innovation = aa + rr
             residual = measurements[t % 4] - pp
-            p, v = pp + aa / s * residual, vv + bb / s * residual
-            a, b, c = aa / s, bb / s, cc - bb * bb / s
+            p, v = pp + aa / innovation * residual, vv + bb / innovation * residual
+            a, b, c = aa * rr / innovation, bb * rr / innovation, cc - bb * bb / innovation
+
 
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--tracking', action='store_true', help='emit tracking checkpoints')
     parser.add_argument('--transient', action='store_true', help='emit covariance-transient checkpoints')
+    parser.add_argument('--robust', action='store_true', help='emit varying-parameter transient checkpoints')
     args = parser.parse_args()
-    rows = transient_references() if args.transient else tracking_references() if args.tracking else references()
+    rows = transient_references(True) if args.robust else transient_references() if args.transient else tracking_references() if args.tracking else references()
     for row in rows:
         print('  #[' + ', '.join(format(float(v), '.17g') for v in row) + '],')

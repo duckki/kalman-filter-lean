@@ -1365,3 +1365,26 @@ The independent Fraction generator has a `--transient` mode. Regressions start
 above and below the nominal covariance, check that the covariance evolves,
 check both neighborhood inequalities at every prefix, and compare twelve
 checkpoints against independent original-word exact recursion.
+
+### Concrete varying-parameter interface
+
+`Implementation/PositionVelocityModel` constructs the original stored model
+from a time increment, two independent process variances, a measurement
+variance and a measurement. It copies all words without rounding arithmetic.
+`Correctness/RobustTracking.ParameterDomain` bounds the first three scalars
+within `theta = 2^-21` of `1/4`, `5/16`, `1/8`, respectively. Measurement
+variance lies in `[1, 1+theta]`. Every original scalar is finite.
+
+`FloatRobustTracking.input_domain` derives native validation, positive process
+noise and every matrix-domain premise from these original scalar conditions.
+`horizon_preservation` allows a new parameter record at every step and retains
+the nonstationary covariance neighborhood and absolute mean envelope for every
+prefix through 16 steps. The parameter domain is proved to contain a nonnominal
+time increment. This is an explicit small normalized parameter box, not a claim
+about arbitrary noise tuning or a physically calibrated sensor.
+
+Independent `--robust` Fraction references and native regressions alternate
+time increments and noise values at the scalar box boundaries, with both
+above- and below-nominal initial covariances. All twelve reference checkpoints
+and every intermediate neighborhood check exercise the actual checked kernels;
+the runtime driver is compared word-for-word with repeated checked steps.
