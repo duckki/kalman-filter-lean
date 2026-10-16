@@ -64,5 +64,32 @@ def StoredInputAccuracy : Prop :=
         ∧ output.all Float.isFinite = true
         ∧ JosephCovarianceAccuracy ((2 : ℝ) ^ (-34 : Int)) input prior k output
 
+/-! ----------------------------------------------------------------------
+## Local diagonal covariance positivity
+-------------------------------------------------------------------------- -/
+
+/-- Under full observation, diagonal prior/noise variances at least one half,
+and the stored-input bounds above, the actual rounded Joseph kernel retains a
+strict diagonal floor and is positive definite. The bounded supplied gain need
+not be optimal. This result does not certify prediction, gain computation, or
+a full-filter horizon.
+Proof witness: `Kalman.Proofs.FloatJosephStructure.stored_input_positive`. -/
+def StoredDiagonalPositive : Prop :=
+  ∀ (input : Input.Model) (prior : Input.State) (k : Array Float),
+    TwoStateDomain input prior k
+    → DecodedDiagonal 2 prior.covariance
+    → matrix 2 2 input.observation = 1
+    → DecodedDiagonal 2 input.measurementNoise
+    → DecodedDiagonal 2 k
+    → (∀ i, (1 : ℝ) / 2 ≤ matrix 2 2 prior.covariance i i)
+    → (∀ i, (1 : ℝ) / 2 ≤ matrix 2 2 input.measurementNoise i i)
+    → ∃ output,
+        output.size = 4
+        ∧ output.all Float.isFinite = true
+        ∧ JosephCovarianceAccuracy ((2 : ℝ) ^ (-34 : Int)) input prior k output
+        ∧ DecodedDiagonal 2 output
+        ∧ (∀ i, (1 : ℝ) / 8 ≤ matrix 2 2 output i i)
+        ∧ (matrix 2 2 output).PosDef
+
 end
 end Kalman.Implementation.Correctness.JosephCovarianceEvaluation

@@ -356,6 +356,17 @@ All storage lookups retain the runtime's zero-padding semantics; the result
 does not need an additional array-shape premise. The existing native/model
 bridge and signed-zero interpretation apply unchanged.
 
+`FloatJosephStructure.stored_input_positive` additionally certifies the
+rounded dense kernel's positivity on the stored-input domain when `H=I`,
+`P,R,K` decode to diagonal matrices, and prior/noise diagonal entries are at
+least `1/2`. For any supplied gain satisfying the entry bound, exact scalar
+Joseph variance is at least `1/4`; diagonal preservation through every rounded
+operation and the `2^-34` entrywise error imply a retained floor of `1/8` and
+positive definiteness. These floors are project margins, not source constants.
+The proof concerns the returned dense array directly, with no symmetry repair
+or assumption that a rounded Gram is positive. Full gain and horizon accuracy
+remain separate obligations.
+
 ## Authoritative decoded input contract
 
 `Definitions/Input.Model` owns the one native input format. It contains state

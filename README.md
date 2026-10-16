@@ -49,7 +49,10 @@ mean equivalence are also proved. See [the sources and specification](docs/paper
   expression at the supplied stored gain. A two-state stored-input theorem
   derives every covariance operation's success and entrywise error at most
   $2^{-34}$ from explicit operand ranges, including full observation $H=I$.
-  Complete filter accuracy remains a separate obligation.
+  On its fully observed diagonal subdomain with prior/noise variances at least
+  $1/2$, the rounded dense result has diagonal floor $1/8$ and is positive
+  definite, including for nonoptimal gains. Complete filter accuracy remains
+  a separate obligation.
 - **QR square-root:** Stores a lower triangular covariance factor $L$ with
   positive diagonal, denoting covariance $LL^T$. It uses QR for prediction,
   innovation, and a factored Joseph correction, with triangular solves for the

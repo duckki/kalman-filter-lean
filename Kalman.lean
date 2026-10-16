@@ -42,6 +42,7 @@ import Kalman.Proofs.ErrorPropagation
 import Kalman.Proofs.FloatJosephError
 import Kalman.Proofs.FloatJosephDomain
 import Kalman.Proofs.FloatJosephSolve
+import Kalman.Proofs.FloatJosephStructure
 import Kalman.Proofs.FloatUnderflow
 import Kalman.Proofs.FloatResidualError
 import Kalman.Proofs.FloatCholeskySolve

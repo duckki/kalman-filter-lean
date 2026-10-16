@@ -309,6 +309,7 @@ the Joseph statement concerns its covariance kernel with a supplied gain.
 | `josephCovarianceAccuracy` | $\lvert \widehat J_{ij}-J(P,H,R,K)_{ij}\rvert \le e_J$; all five products and both sums are covered | `JosephProfile` records successful computations and operand budgets; $e_J$ is the public `Proofs.ArithmeticProfiles.josephRadius`; reference uses the same stored gain, with separate entry bounds on $P,I-KH,K$ |
 | `FloatJosephDomain.stored_input_accuracy` | All covariance-kernel operations succeed with finite 2×2 output and entrywise error at most $2^{-34}$ | Stored finite $P,H,R,K$ entry bounds $2,1,3/2,1$; no intermediate execution or profile premise; same stored gain comparator |
 | `FloatJosephSolve.solve_accuracy` | Actual two-state LDLᵀ solve succeeds, is finite, preserves decoded diagonal RHS structure, and has entrywise forward error at most $2^{-40}$ against $A^{-1}B$ | Finite diagonal coefficients with entries in $[3/2,5]$ and finite RHS entries bounded by four; no intermediate execution premise |
+| `FloatJosephStructure.stored_input_positive` | Rounded dense Joseph output is diagonal, finite, positive definite, has diagonal floor $1/8$, and retains the $2^{-34}$ evaluation bound | Stored-input domain above, $H=I$, decoded diagonal $P,R,K$, and prior/noise diagonal entries at least $1/2$; supplied gain may be nonoptimal |
 | `qrGramFactorInitialAccuracy` | Execution succeeds with finite lower-positive $L$; exact $LL^T\succeq(M^2/16)I$ is PD; $`\lvert(LL^T-AA^T)_{ij}\rvert\le G_{d,n}(M)\le M^2/128`$ | Original finite $n\times d$ array, $n\le d\le8$, $2^{-896}\le M\le2^{900}$, row energies $\le M^2/2$, $AA^T\succeq(M^2/8)I$; no run or intermediate profile assumption |
 | `factorMaterializationAccuracy` | Dense $LL^T$ formation error at most $n2^{-50}M$; checked output is valid | Valid retained factor, $1\le n\le32$, finite storage, Gram dot-product mass $\le M$, $2^{-1022}\le M\le2^{990}$ |
 
@@ -690,6 +691,20 @@ avoids the generic factorization allowance. Ninety-six native boundary/interior
 solves additionally check original-system residuals and zero preservation.
 This is a completed solver-stage theorem; composing gain accuracy and the
 full Joseph horizon remains outstanding.
+
+`FloatJosephStructure.covariance_diagonal` covers diagonal preservation through
+all five products and both rounded sums. `stored_input_diagonal_accuracy`
+derives successful execution, accuracy, and diagonal output from stored inputs.
+`stored_input_positive` proves the stronger public `StoredDiagonalPositive`
+statement: with `H=I`, diagonal stored `P,R,K`, prior/noise variances at least
+`1/2`, and the original stored-input upper bounds, the actual rounded dense
+output has diagonal entries at least `1/8` and is positive definite. Exact
+scalar Joseph variance is at least `1/4` for every real gain in this domain;
+the evaluation error leaves the stated margin. Gain optimality is unnecessary.
+Forty-eight native cases exercise boundary variances, nonoptimal signed gains,
+and signed zeros. This local result does not yet establish the operating
+invariant or a full-filter horizon.
+
 
 ### Retained factors and optional dense output
 
