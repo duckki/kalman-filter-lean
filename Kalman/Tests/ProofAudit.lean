@@ -51,6 +51,7 @@ run_cmd do
       ``Kalman.Proofs.FloatJosephStructure.covariance_diagonal,
       ``Kalman.Proofs.FloatJosephStructure.stored_input_diagonal_accuracy,
       ``Kalman.Proofs.FloatJosephStructure.stored_input_positive,
+      ``Kalman.Proofs.FloatJosephGain.gain_stages,
       ``Kalman.Proofs.FloatSolveError.solve_accuracy,
       ``Kalman.Proofs.FloatResidualError.choleskyDiagonal_accuracy,
       ``Kalman.Proofs.FloatCholeskySolve.solve_accuracy,

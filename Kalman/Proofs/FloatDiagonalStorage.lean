@@ -55,6 +55,47 @@ theorem sub_diagonal_two (a b result : Array Float)
     (da i j hi hj hij) (db i j hi hj hij)
   simpa [entry, Flare.Matrix.Dense.entry, Array.getD_eq_getD_getElem?, hidx] using hz.2
 
+/-- Rounded elementwise addition preserves decoded diagonal storage, including
+both zero signs, on every finite sum profile. -/
+theorem add_diagonal_two (a b result : Array Float) (E : Int)
+    (p : Kalman.Proofs.ArithmeticProfiles.SumProfile a b E false) (hs : a.size = 4)
+    (da : DecodedDiagonal 2 a) (db : DecodedDiagonal 2 b)
+    (hr : add a b = .ok result)
+    : DecodedDiagonal 2 result := by
+  have he (i : Nat) (hi : i < a.size) := Flare.Binary64.Arithmetic.add_error
+    (a.getD i 0.0) (b.getD i 0.0) E
+    (Flare.Matrix.Storage.getD_finite _ _ p.finite_left)
+    (Flare.Matrix.Storage.getD_finite _ _ p.finite_right)
+    p.exponent_lower p.exponent_upper
+    (by simpa only [Bool.false_eq_true, ↓reduceIte] using p.magnitude i hi)
+  have hm : add a b = .ok ((Array.range a.size).map (fun i => a.getD i 0.0 + b.getD i 0.0)) := by
+    apply Flare.Matrix.Multiplication.mapM_eq_ok_map
+    intro i hi
+    exact FloatDenseError.finite_ok _ (he i (by simpa using hi)).1
+  have eq := Except.ok.inj (hm.symm.trans hr)
+  rw [← eq]
+  intro i j hi hj hij
+  have hidx : i * 2 + j < a.size := by rw [hs]; omega
+  have hz := Flare.Binary64.Zero.add_zero (entry 2 a i j) (entry 2 b i j)
+    (Flare.Matrix.Storage.getD_finite a _ p.finite_left)
+    (Flare.Matrix.Storage.getD_finite b _ p.finite_right)
+    (da i j hi hj hij) (db i j hi hj hij)
+  simpa [entry, Flare.Matrix.Dense.entry, Array.getD_eq_getD_getElem?, hidx] using hz.2
+
+/-- Nonnegative diagonal bounds also bound every decoded stored entry. -/
+theorem diagonal_magnitude (n : Nat) (a : Array Float) (cap : ℝ)
+    (hd : DecodedDiagonal n a) (hlo : ∀ i, 0 ≤ matrix n n a i i)
+    (hhi : ∀ i, matrix n n a i i ≤ cap) (hc : 0 ≤ cap)
+    : ∀ i j, |matrix n n a i j| ≤ cap := by
+  intro i j
+  by_cases eq : i = j
+  · subst j
+    rw [abs_of_nonneg (hlo i)]
+    exact hhi i
+  · change |value (entry n a i.val j.val)| ≤ cap
+    rw [hd i.val j.val i.isLt j.isLt (fun h => eq (Fin.ext h)), abs_zero]
+    exact hc
+
 theorem matrix_diagonal (n : Nat) (a : Array Float) (h : DecodedDiagonal n a)
     : matrix n n a = diagonal (fun i => matrix n n a i i) := by
   ext i j

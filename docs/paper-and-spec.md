@@ -360,6 +360,19 @@ All storage lookups retain the runtime's zero-padding semantics; the result
 does not need an additional array-shape premise. The existing native/model
 bridge and signed-zero interpretation apply unchanged.
 
+`FloatJosephGain.gain_stages` specializes the common dense correction gain
+prefix to original diagonal prior variances `[15/16,13/4]`, original diagonal
+measurement noise `[1,3/2]`, and stored observation decoding to identity. The
+unchanged native order is HP, HPHᵀ, addition of original R, PHᵀ, RHS transpose,
+LDLᵀ solve, then gain transpose. Product mass eight and sum exponent three
+are derived from original operand bounds. Innovation error against original
+`P+R` is at most `2^-44`; its diagonal entries lie in `[3/2,5]`. The sharp
+solver theorem and an original-coefficient perturbation argument yield gain
+error `2^-36` against original `P(P+R)⁻¹`, with native gain diagonal entries in
+`[3/8,13/16]` and exact decoded off-diagonal zeros. These budgets are project
+choices. No factorized or separately rounded R replaces the original words.
+This prefix result does not by itself certify a complete filter horizon.
+
 `FloatJosephStructure.stored_input_positive` additionally certifies the
 rounded dense kernel's positivity on the stored-input domain when `H=I`,
 `P,R,K` decode to diagonal matrices, and prior/noise diagonal entries are at

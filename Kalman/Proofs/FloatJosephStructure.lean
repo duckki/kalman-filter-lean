@@ -16,31 +16,6 @@ open Flare.Binary64.Value
 
 set_option maxHeartbeats 800000
 
-private theorem add_diagonal (a b result : Array Float) (E : Int)
-    (p : SumProfile a b E false) (hs : a.size = 4)
-    (da : DecodedDiagonal 2 a) (db : DecodedDiagonal 2 b)
-    (hr : add a b = .ok result)
-    : DecodedDiagonal 2 result := by
-  have he (i : Nat) (hi : i < a.size) := Flare.Binary64.Arithmetic.add_error
-    (a.getD i 0.0) (b.getD i 0.0) E
-    (Flare.Matrix.Storage.getD_finite _ _ p.finite_left)
-    (Flare.Matrix.Storage.getD_finite _ _ p.finite_right)
-    p.exponent_lower p.exponent_upper
-    (by simpa only [Bool.false_eq_true, ↓reduceIte] using p.magnitude i hi)
-  have hm : add a b = .ok ((Array.range a.size).map (fun i => a.getD i 0.0 + b.getD i 0.0)) := by
-    apply Flare.Matrix.Multiplication.mapM_eq_ok_map
-    intro i hi
-    exact FloatDenseError.finite_ok _ (he i (by simpa using hi)).1
-  have eq := Except.ok.inj (hm.symm.trans hr)
-  rw [← eq]
-  intro i j hi hj hij
-  have hidx : i * 2 + j < a.size := by rw [hs]; omega
-  have hz := Flare.Binary64.Zero.add_zero (entry 2 a i j) (entry 2 b i j)
-    (Flare.Matrix.Storage.getD_finite a _ p.finite_left)
-    (Flare.Matrix.Storage.getD_finite b _ p.finite_right)
-    (da i j hi hj hij) (db i j hi hj hij)
-  simpa [entry, Flare.Matrix.Dense.entry, Array.getD_eq_getD_getElem?, hidx] using hz.2
-
 /-- All five products and both sums preserve decoded diagonal storage. The
 profile is an intermediate arithmetic contract, not an input-domain theorem. -/
 theorem covariance_diagonal (input : Input.Model) (prior : Input.State)
@@ -76,8 +51,8 @@ theorem covariance_diagonal (input : Input.Model) (prior : Input.State)
     p.profileSecond.finite_left (by simpa only [hn, hm] using p.profileSecond.finite_right) dkr dkt
     (by simpa only [hn, hm] using p.computeSecond)
   have fs := (FloatJosephError.product_within p.profileFirst p.computeFirst).1
-  apply add_diagonal p.first p.second output p.exponentSum p.profileSum
-    (by simpa only [hn] using fs) df ds p.computeSum
+  apply FloatDiagonalStorage.add_diagonal_two p.first p.second output p.exponentSum
+    p.profileSum (by simpa only [hn] using fs) df ds p.computeSum
 
 /-- Stored-input success and accuracy now include exact diagonal preservation;
 no successful intermediate computation is assumed by this result. -/
