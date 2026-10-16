@@ -1,6 +1,7 @@
 import Kalman.Implementation.CovarianceFilter
 import Kalman.Implementation.PositionVelocityModel
 import Kalman.Implementation.SymmetricJosephFilter
+import Kalman.Implementation.UncertaintyIntervals
 import Kalman.Implementation.UncertaintyInflation
 import Kalman.Implementation.SquareRootFilter
 
@@ -34,6 +35,229 @@ def close (a b : Array Float) (tolerance : Float := 1.0e-11) : Bool :=
 
 def scalar (h r q : Float) : Model :=
   ⟨1, 1, #[1.0], #[h], #[q], #[r], #[2.0]⟩
+
+/-- Independent Decimal endpoints: `UncertaintyIntervalReference.py`. -/
+def uncertaintyIntervalReference : Array (Array Float) :=
+  #[
+    #[
+      Float.ofBits 0x0000000000000000,
+      Float.ofBits 0x0000000000000000,
+      Float.ofBits 0x0000000000000000,
+      Float.ofBits 0x0000000000000000,
+      Float.ofBits 0x0000000000000000,
+      Float.ofBits 0x8000000000000001,
+      Float.ofBits 0x0000000000000001
+    ],
+    #[
+      Float.ofBits 0x8000000000000000,
+      Float.ofBits 0x8000000000000000,
+      Float.ofBits 0x0000000000000000,
+      Float.ofBits 0x8000000000000000,
+      Float.ofBits 0x4020000000000000,
+      Float.ofBits 0x8000000000000001,
+      Float.ofBits 0x0000000000000001
+    ],
+    #[
+      Float.ofBits 0x0000000000000001,
+      Float.ofBits 0x0000000000000001,
+      Float.ofBits 0x0000000000000001,
+      Float.ofBits 0x0000000000000001,
+      Float.ofBits 0x0000000000000001,
+      Float.ofBits 0x8000000000000001,
+      Float.ofBits 0x0000000000000003
+    ],
+    #[
+      Float.ofBits 0xbff0000000000000,
+      Float.ofBits 0x4000000000000000,
+      Float.ofBits 0x3ff0000000000000,
+      Float.ofBits 0x4000000000000000,
+      Float.ofBits 0x4020000000000000,
+      Float.ofBits 0xc030db3d742c2656,
+      Float.ofBits 0x402db67ae8584cab
+    ],
+    #[
+      Float.ofBits 0xbff0000000000000,
+      Float.ofBits 0x3fe0000000000000,
+      Float.ofBits 0x0000000000000000,
+      Float.ofBits 0x3e20000000000000,
+      Float.ofBits 0x4008000000000000,
+      Float.ofBits 0xc008f876cd1f6cda,
+      Float.ofBits 0x3ff1f0ed9a3ed9b4
+    ],
+    #[
+      Float.ofBits 0xbff0000000000000,
+      Float.ofBits 0x3ff0000000000000,
+      Float.ofBits 0x0000000000000000,
+      Float.ofBits 0x0000000000000000,
+      Float.ofBits 0x3ff0000000000000,
+      Float.ofBits 0xc000000000000001,
+      Float.ofBits 0x0000000000000001
+    ],
+    #[
+      Float.ofBits 0xbff0000000000000,
+      Float.ofBits 0x0000000000000000,
+      Float.ofBits 0x0000000000000000,
+      Float.ofBits 0x0000000000000000,
+      Float.ofBits 0x4020000000000000,
+      Float.ofBits 0xbff0000000000001,
+      Float.ofBits 0xbfefffffffffffff
+    ],
+    #[
+      Float.ofBits 0xbff0000000000000,
+      Float.ofBits 0x3fefffffffffffff,
+      Float.ofBits 0x0000000000000001,
+      Float.ofBits 0x0000000000000001,
+      Float.ofBits 0x4020000000000000,
+      Float.ofBits 0xc022000000000001,
+      Float.ofBits 0x401c000000000000
+    ],
+    #[
+      Float.ofBits 0x0000000000000000,
+      Float.ofBits 0x4000000000000000,
+      Float.ofBits 0x3ff0000000000000,
+      Float.ofBits 0x4000000000000000,
+      Float.ofBits 0x4020000000000000,
+      Float.ofBits 0xc02fb67ae8584cab,
+      Float.ofBits 0x402fb67ae8584cab
+    ],
+    #[
+      Float.ofBits 0x0000000000000000,
+      Float.ofBits 0x3fe0000000000000,
+      Float.ofBits 0x0000000000000000,
+      Float.ofBits 0x3e20000000000000,
+      Float.ofBits 0x4008000000000000,
+      Float.ofBits 0xc000f876cd1f6cda,
+      Float.ofBits 0x4000f876cd1f6cda
+    ],
+    #[
+      Float.ofBits 0x0000000000000000,
+      Float.ofBits 0x3ff0000000000000,
+      Float.ofBits 0x0000000000000000,
+      Float.ofBits 0x0000000000000000,
+      Float.ofBits 0x3ff0000000000000,
+      Float.ofBits 0xbff0000000000001,
+      Float.ofBits 0x3ff0000000000001
+    ],
+    #[
+      Float.ofBits 0x0000000000000000,
+      Float.ofBits 0x0000000000000000,
+      Float.ofBits 0x0000000000000000,
+      Float.ofBits 0x0000000000000000,
+      Float.ofBits 0x4020000000000000,
+      Float.ofBits 0x8000000000000001,
+      Float.ofBits 0x0000000000000001
+    ],
+    #[
+      Float.ofBits 0x0000000000000000,
+      Float.ofBits 0x3fefffffffffffff,
+      Float.ofBits 0x0000000000000001,
+      Float.ofBits 0x0000000000000001,
+      Float.ofBits 0x4020000000000000,
+      Float.ofBits 0xc020000000000000,
+      Float.ofBits 0x4020000000000000
+    ],
+    #[
+      Float.ofBits 0x3ff0000000000000,
+      Float.ofBits 0x4000000000000000,
+      Float.ofBits 0x3ff0000000000000,
+      Float.ofBits 0x4000000000000000,
+      Float.ofBits 0x4020000000000000,
+      Float.ofBits 0xc02db67ae8584cab,
+      Float.ofBits 0x4030db3d742c2656
+    ],
+    #[
+      Float.ofBits 0x3ff0000000000000,
+      Float.ofBits 0x3fe0000000000000,
+      Float.ofBits 0x0000000000000000,
+      Float.ofBits 0x3e20000000000000,
+      Float.ofBits 0x4008000000000000,
+      Float.ofBits 0xbff1f0ed9a3ed9b4,
+      Float.ofBits 0x4008f876cd1f6cda
+    ],
+    #[
+      Float.ofBits 0x3ff0000000000000,
+      Float.ofBits 0x3ff0000000000000,
+      Float.ofBits 0x0000000000000000,
+      Float.ofBits 0x0000000000000000,
+      Float.ofBits 0x3ff0000000000000,
+      Float.ofBits 0x8000000000000001,
+      Float.ofBits 0x4000000000000001
+    ],
+    #[
+      Float.ofBits 0x3ff0000000000000,
+      Float.ofBits 0x0000000000000000,
+      Float.ofBits 0x0000000000000000,
+      Float.ofBits 0x0000000000000000,
+      Float.ofBits 0x4020000000000000,
+      Float.ofBits 0x3fefffffffffffff,
+      Float.ofBits 0x3ff0000000000001
+    ],
+    #[
+      Float.ofBits 0x3ff0000000000000,
+      Float.ofBits 0x3fefffffffffffff,
+      Float.ofBits 0x0000000000000001,
+      Float.ofBits 0x0000000000000001,
+      Float.ofBits 0x4020000000000000,
+      Float.ofBits 0xc01c000000000000,
+      Float.ofBits 0x4022000000000001
+    ],
+    #[
+      Float.ofBits 0x3fd0000000000000,
+      Float.ofBits 0x3fb0000000000000,
+      Float.ofBits 0x0000000000000000,
+      Float.ofBits 0x0000000000000000,
+      Float.ofBits 0x3ff0000000000000,
+      Float.ofBits 0x8000000000000001,
+      Float.ofBits 0x3fe0000000000001
+    ],
+    #[
+      Float.ofBits 0xbfd0000000000000,
+      Float.ofBits 0x3fb0000000000000,
+      Float.ofBits 0x0000000000000000,
+      Float.ofBits 0x0000000000000000,
+      Float.ofBits 0x3ff0000000000000,
+      Float.ofBits 0xbfe0000000000001,
+      Float.ofBits 0x0000000000000001
+    ],
+    #[
+      Float.ofBits 0x3ff0000000000000,
+      Float.ofBits 0x3fffffffffffffff,
+      Float.ofBits 0x3fefffffffffffff,
+      Float.ofBits 0x4000000000000000,
+      Float.ofBits 0x4020000000000000,
+      Float.ofBits 0xc02db67ae8584cab,
+      Float.ofBits 0x4030db3d742c2656
+    ]
+  ]
+
+def uncertaintyIntervalChecks : IO Unit := do
+  for row in uncertaintyIntervalReference do
+    let mean := row.getD 0 0
+    let result ←
+      requireOk
+        (UncertaintyIntervals.bounds mean (row.getD 1 0)
+          (row.getD 2 0) (row.getD 3 0) (row.getD 4 0))
+        "uncertainty interval"
+    check
+      (result.varianceUpper.isFinite
+        && result.radius.isFinite
+        && result.lower.isFinite
+        && result.upper.isFinite)
+      "finite interval fields"
+    check (result.lower ≤ row.getD 5 0 && row.getD 6 0 ≤ result.upper)
+      "outward enclosure of independent high-precision endpoints"
+    check (result.lower ≤ mean && mean ≤ result.upper) "interval contains native center"
+    check (result.varianceUpper ≥ row.getD 1 0 + row.getD 2 0)
+      "conservative stored variance"
+  for bad in [Float.ofBits 0x7ff0000000000000, Float.ofBits 0x7ff8000000000000] do
+    for index in [:5] do
+      let args := (#[0.0, 1.0, 0.0, 0.0, 3.0]).set! index bad
+      check
+        (match UncertaintyIntervals.bounds (args.getD 0 0) (args.getD 1 0)
+                (args.getD 2 0) (args.getD 3 0) (args.getD 4 0) with
+          | .error .nonfiniteComputation => true
+          | _ => false)
+        "nonfinite interval argument rejected"
 
 def uncertaintyInflationChecks : IO Unit := do
   for variance in [0.4375, Float.ofBits 0x3fefffffffffffff, 1.0, 1.625] do
@@ -4369,6 +4593,7 @@ def run : IO Unit := do
   josephCompleteUpdateChecks
   josephCompleteStepChecks
   uncertaintyInflationChecks
+  uncertaintyIntervalChecks
   josephPositionCorrectionChecks
   josephSymmetryRepairChecks
   constantVelocityPredictionChecks

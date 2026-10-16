@@ -20,7 +20,10 @@ run_cmd do
         if (`Kalman.Proofs).isPrefixOf userName then
           count := count + 1
       | _ => pure ()
-  for required in #[``Kalman.Proofs.JosephPositionCorrection.covarianceFloor,
+  for required in #[``Kalman.Proofs.FloatUncertaintyIntervals.bounds_enclose,
+      ``Kalman.Proofs.FloatTrackingIntervals.allowance_value,
+      ``Kalman.Proofs.FloatTrackingIntervals.horizon_intervals,
+      ``Kalman.Proofs.JosephPositionCorrection.covarianceFloor,
       ``Kalman.Proofs.FloatSymmetricJosephCorrection.mirror_accuracy,
       ``Kalman.Proofs.FloatSymmetricJosephCorrection.update_accuracy,
       ``Kalman.Proofs.FloatSymmetricJosephCorrection.output_posDef,

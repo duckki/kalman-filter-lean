@@ -1388,3 +1388,40 @@ time increments and noise values at the scalar box boundaries, with both
 above- and below-nominal initial covariances. All twelve reference checkpoints
 and every intermediate neighborhood check exercise the actual checked kernels;
 the runtime driver is compared word-for-word with repeated checked steps.
+
+### Executable conservative uncertainty intervals
+
+`Implementation/UncertaintyIntervals.bounds` takes a native mean, variance,
+covariance-error allowance, mean-error allowance and nonnegative multiplier.
+It separately rounds variance plus its allowance, adds exact `2^-40` padding,
+takes the native square root, multiplies, adds the mean allowance and another
+padding, then computes both endpoints and pads each outward. Every intermediate
+result has a finite guard. Input range/sign conditions are theorem premises,
+not dynamic checks in this low-level routine.
+
+`FloatUncertaintyIntervals.bounds_enclose` proves successful execution and
+coverage by the actual returned endpoints. Its normalized finite-input domain
+is `|mean| <= 1`, variance in `[0,2]`, covariance allowance in `[0,1]`, mean
+allowance in `[0,2]`, and multiplier in `[0,8]`. Signed zero and subnormal
+variances are included. Arithmetic bounds come from the pinned FLARE binary64
+bridge, including its native square-root theorem; each arithmetic error is
+bounded by `2^-46` on the derived intermediate range. The padding pays for
+variance inflation, square-root rounding, radius arithmetic and both endpoint
+operations. This is a completed native theorem, not a real-arithmetic-only
+interval transfer.
+
+`FloatTrackingIntervals.horizon_intervals` instantiates this API at every prefix
+of the existing stationary coupled original-input certificate, using zero
+covariance error and the uniform `2^-29` mean allowance. The original measurement
+and horizon restrictions still apply. The varying-parameter/nonstationary
+preservation theorem does not yet supply this tight original-input error
+allowance; that theorem should not be presented as an interval-accuracy result.
+Statistical coverage of the ideal interval remains an explicit premise: the
+new result prevents numerical arithmetic from losing that coverage, and does
+not establish noise calibration or protection against model mismatch.
+
+`UncertaintyIntervalReference.py` independently computes high-precision Decimal
+ideal endpoints from exact original binary64 words, then rounds references
+outward by a binary64 neighbor. Native regressions cover 21 cases, including
+range boundaries, signed zero, subnormal inputs, cancellation and binade
+neighbors, plus rejection of nonfinite arguments in all five positions.
