@@ -1313,3 +1313,21 @@ and time increment, and small normalized measurement envelope remain explicit
 restrictions. Physically calibrated units, nonstationary covariance envelopes,
 and tighter accumulated bounds are separate application work; no statistical
 coverage or measured sensor performance follows from this arithmetic theorem.
+
+### Two-step contraction and uniform native mean accuracy
+
+`Definitions/Theorems/TrackingContraction` states exact two-step contraction
+and the response to bounded local perturbations. `Proofs/TrackingContraction`
+proves weighted contraction `15/16`: the squared mean transition matrix is
+`[[7/32, 23/128], [-23/64, 217/256]]`, with both absolute row sums `15/16`
+after weighting velocity by four. Two interleaved inductions charge two local
+errors per contraction and yield the uniform weighted bound `32*delta`.
+
+`FloatUniformTracking.horizon_accuracy` derives all local errors from actual
+checked prefixes under the existing original-input tracking domain. Mean
+componentwise error is at most `2^-29`, independent of prefix length, and
+covariance error remains zero in the stationary dyadic family. This strengthens
+the previous linear accumulated bound. The original measurement bound and
+`2^20` horizon cap are retained here; this theorem alone does not widen the
+operating domain. The existing independent tracking regressions exercise the
+unchanged runtime, and the new exact/native results enter the axiom audit.

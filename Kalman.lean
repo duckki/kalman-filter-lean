@@ -117,3 +117,4 @@ import Kalman.Proofs.FloatSymmetricJosephCorrection
 import Kalman.Proofs.FloatConstantVelocityPrediction
 import Kalman.Proofs.FloatConstantVelocityTracking
 import Kalman.Proofs.FloatConstantVelocityHorizon
+import Kalman.Proofs.FloatUniformTracking
