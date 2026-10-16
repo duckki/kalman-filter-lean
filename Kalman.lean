@@ -48,6 +48,7 @@ import Kalman.Proofs.FloatJosephGain
 import Kalman.Proofs.FloatJosephUpdate
 import Kalman.Proofs.FloatJosephPrediction
 import Kalman.Proofs.FloatJosephFilter
+import Kalman.Proofs.FloatJosephHorizon
 import Kalman.Proofs.FloatUnderflow
 import Kalman.Proofs.FloatResidualError
 import Kalman.Proofs.FloatCholeskySolve

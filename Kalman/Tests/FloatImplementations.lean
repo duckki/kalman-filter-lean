@@ -2503,6 +2503,153 @@ def josephCompleteStepChecks : IO Unit := do
             && (output.mean.getD i 0.0).abs ≤ 1.125)
           "Joseph propagated dense invariant"
 
+/-- Original-word model stream in the certified fully observed diagonal family. -/
+def josephHorizonModel (scenario t : Nat) : Model :=
+  let zero := if t % 2 == 0 then 0.0 else -0.0
+  let f0 := if scenario == 0 then 1.0 else 0.9990234375
+  let f1 := if scenario == 0 then 1.0 else -1.0
+  let q0 := 1.0 + Float.ofNat (t % 3) / 4.0
+  let q1 := 1.0 + Float.ofNat ((t + 1) % 3) / 4.0
+  let r0 := 1.0 + Float.ofNat ((t + 2) % 3) / 4.0
+  let r1 := 1.0 + Float.ofNat (t % 3) / 4.0
+  let z0 := if t % 4 < 2 then 1.0 else -1.0
+  let z1 := Float.ofNat (t % 3) - 1.0
+  ⟨
+    2,
+    2,
+    #[f0, zero, zero, f1],
+    #[1.0, zero, zero, 1.0],
+    #[q0, zero, zero, q1],
+    #[r0, zero, zero, r1],
+    #[z0, z1]
+  ⟩
+
+/-- Two 256-step checked Joseph trajectories, with time-varying original Q/R/z,
+against an independent exact-rational ideal trace from original dense words.
+Every prefix checks the propagated native invariant; oracle tolerance is
+separate from the formal uniform covariance/mean error budgets. -/
+def josephCertifiedHorizonChecks : IO Unit := do
+  let checkpoints : Array Nat := #[0, 1, 2, 7, 31, 127, 256]
+  let references : Array (Array Float) :=
+    #[
+      #[1, -1, 1, 0, 0, 1.5],
+      #[1, -1, 0.8571428571428571, 0, 0, 0.73333333333333328],
+      #[1, -0.35885167464114831, 0.67816091954022983, 0, 0, 0.80143540669856461],
+      #[
+        -0.17957790192427064,
+        -0.52614953288974664,
+        0.81686840471756672,
+        0,
+        0,
+        0.67393495981795659
+      ],
+      #[
+        -0.1819602095315829,
+        -0.52481802293371294,
+        0.81686806183121408,
+        0,
+        0,
+        0.6739344569642477
+      ],
+      #[
+        -0.18196020953176065,
+        -0.52481802293361368,
+        0.81686806183121408,
+        0,
+        0,
+        0.6739344569642477
+      ],
+      #[
+        -0.71182057396281839,
+        -0.52481802293361368,
+        0.81686806183121408,
+        0,
+        0,
+        0.6739344569642477
+      ],
+      #[1, -1, 1, 0, 0, 1.5],
+      #[
+        0.99958123964515511,
+        -0.46666666666666667,
+        0.85678409495827257,
+        0,
+        0,
+        0.73333333333333328
+      ],
+      #[
+        0.99955076849682756,
+        0.1674641148325359,
+        0.6779503737010939,
+        0,
+        0,
+        0.80143540669856461
+      ],
+      #[
+        -0.17962319822786069,
+        -0.80666532246449862,
+        0.81650481029154665,
+        0,
+        0,
+        0.67393495981795659
+      ],
+      #[
+        -0.18199799033979505,
+        -0.80771425962824606,
+        0.81650446915739938,
+        0,
+        0,
+        0.6739344569642477
+      ],
+      #[
+        -0.18199799033997038,
+        -0.80771425962832433,
+        0.81650446915739938,
+        0,
+        0,
+        0.6739344569642477
+      ],
+      #[
+        -0.71153049749650721,
+        -0.80771425962832433,
+        0.81650446915739938,
+        0,
+        0,
+        0.6739344569642477
+      ]
+    ]
+  check (references.size == 2 * checkpoints.size) "Joseph horizon oracle coverage"
+  for scenario in [:2] do
+    let mut current : State := ⟨#[1.0, -1.0], #[1.0, 0.0, 0.0, 1.5]⟩
+    let mut checkpoint := 0
+    for t in [:257] do
+      check
+        (current.mean.size == 2
+          && current.covariance.size == 4
+          && current.mean.all Float.isFinite
+          && current.covariance.all Float.isFinite)
+        "Joseph horizon finite storage"
+      check (current.covariance.getD 1 1.0 == 0.0 && current.covariance.getD 2 1.0 == 0.0)
+        "Joseph horizon exact diagonal structure"
+      for i in [:2] do
+        check
+          (0.4375 ≤ current.covariance.getD (i * 2 + i) 0.0
+            && current.covariance.getD (i * 2 + i) 0.0 ≤ 1.625
+            && (current.mean.getD i 0.0).abs ≤ 1.125)
+          "Joseph horizon propagated invariant"
+      if checkpoint < checkpoints.size && t == checkpoints.getD checkpoint 999 then
+        let expected := references.getD (scenario * checkpoints.size + checkpoint) #[]
+        check
+          (close current.mean (expected.extract 0 2) 1.0e-12
+            && close current.covariance (expected.extract 2 6) 1.0e-12)
+          "Joseph horizon independent original-input ideal reference"
+        checkpoint := checkpoint + 1
+      if t < 256 then
+        current ←
+          requireOk
+            (CovarianceFilter.step .joseph (josephHorizonModel scenario t) current)
+            "Joseph certified-family checked horizon step"
+    check (checkpoint == checkpoints.size) "Joseph horizon visited all ideal checkpoints"
+
 /-- A reproducible binary64 one-step negative variance, with F=0 and Q=1 so
 the full-step predicted covariance is exactly one. This is not an accumulation example. -/
 def negativeVarianceChecks : IO Unit := do
@@ -3393,6 +3540,7 @@ def run : IO Unit := do
   josephComputedGainChecks
   josephCompleteUpdateChecks
   josephCompleteStepChecks
+  josephCertifiedHorizonChecks
   negativeVarianceChecks
   repeatedNegativeChecks
   filterHorizonChecks

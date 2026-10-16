@@ -343,8 +343,8 @@ gain and dense prior. Stored `W` is bounded by `7/2`, exact `I-KH` by three,
 and stored `WP` and the first congruence term by 29 and 204. These sharper
 intermediate bounds allow the prior cap of four (covering the reached `13/4`
 prediction bound) without increasing the `2^-34` allowance.
-This theorem does not yet certify the gain computation
-or accumulated full-filter error. It reuses the pinned FLARE nearest-arithmetic,
+This covariance-kernel theorem is separate from the completed computed-gain
+and accumulated full-filter results below. It reuses the pinned FLARE nearest-arithmetic,
 matrix multiplication, and native/model bridges already recorded here.
 
 The companion `FloatJosephSolve` proof specializes the unchanged native LDLᵀ
@@ -355,7 +355,7 @@ factor decodes to identity. FLARE forward/backward substitution equations and
 rounding bounds then yield `2^-40` entrywise error against the original
 coefficient matrix inverse times RHS, and exact decoded diagonal preservation
 when RHS is diagonal. These intervals and allowances are project choices for
-the forthcoming full Joseph gain proof, not a general conditioning theorem.
+the completed Joseph gain proof, not a general conditioning theorem.
 All storage lookups retain the runtime's zero-padding semantics; the result
 does not need an additional array-shape premise. The existing native/model
 bridge and signed-zero interpretation apply unchanged.
@@ -381,8 +381,9 @@ Joseph variance is at least `1/4`; diagonal preservation through every rounded
 operation and the `2^-34` entrywise error imply a retained floor of `1/8` and
 positive definiteness. These floors are project margins, not source constants.
 The proof concerns the returned dense array directly, with no symmetry repair
-or assumption that a rounded Gram is positive. Computed-gain correction accuracy is discharged below; prediction and
-accumulated horizon accuracy remain separate obligations.
+or assumption that a rounded Gram is positive. The completed correction,
+checked-step, and horizon results below additionally charge gain and prediction
+error.
 
 The complete `FloatJosephUpdate.update_accuracy` correction adds original
 prior mean magnitude `19/16` and measurement magnitude one to the gain domain.
@@ -408,7 +409,30 @@ correction stages, preserves the dense invariant, and bounds both local errors
 by `2^-32` against an exact full step from the same incoming stored state.
 Exact correction sensitivity propagates the prediction discrepancy through
 the optimal gain and mean; it is not omitted. The step result is complete,
-while independent accumulated trajectory accuracy remains separate.
+and the horizon result below separately accumulates independent-trajectory
+discrepancy.
+
+The completed `FloatJosephHorizon.initialized_horizon_accuracy` result uses
+the same original fully observed diagonal model/initialization domains as QR.
+Initial/native input arrays have correct finite shapes, `n=m=2`, `H=I`,
+diagonal F/Q/R and initial covariance, transition magnitudes at most one,
+original initial/noise variances `[1,3/2]`, and original initial mean/every
+measurement bounded by one. No reached execution, profile, reference-state
+bound, or desired output error is an original-input hypothesis.
+
+The correctness-side `josephRun` specifies repeated calls to the existing
+checked runtime step without changing or duplicating its arithmetic. Native
+initialization preserves the original dense words exactly, with zero initial
+error. The independent exact matrix `exactRun` uses those same original words
+and time-varying models, and has its own invariant. Local full-step error
+`2^-32` and exact covariance/mean sensitivity coefficients `9/25` and `3/5,1/2`
+close uniform covariance/mean budgets `2^-30/2^-29` at every finite prefix.
+Native dense covariance entries remain `[7/16,13/8]`, hence strictly positive;
+mean magnitude remains at most `9/8`. No rounded Gram or symmetry repair is
+used. Identity and near-unit/sign-reversing original dynamics provide completed
+nonempty-domain witnesses for every horizon. These allowances are sufficient
+project certificates on a restricted shared family, not a general ranking of
+Joseph and QR numerical accuracy.
 
 ## Authoritative decoded input contract
 

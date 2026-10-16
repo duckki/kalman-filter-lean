@@ -1,5 +1,6 @@
 import Kalman.Implementation.CovarianceFilter
 import Kalman.Implementation.Correctness.InputInterpretation
+import Kalman.Implementation.Correctness.FullyObservedDiagonalFilterAccuracy
 
 /-! Dense-state invariants and completed native direct-Joseph guarantees.
 The exact reference always interprets the original finite input words. -/
@@ -65,6 +66,60 @@ def StepAccuracy (input : Input.Model) (current output : Input.State) : Prop :=
   ∧ StateWithin ((2 : ℝ) ^ (-32 : Int)) ((2 : ℝ) ^ (-32 : Int)) (state 2 output)
       (CovarianceRecursion.step .joseph (model (atDimensions 2 2 input)) (state 2 current)
         (vector 2 input.measurement))
+
+/-! ----------------------------------------------------------------------
+## Original-input horizons and uniform accumulated accuracy
+-------------------------------------------------------------------------- -/
+
+/-- The original model domain is shared with the QR certificate; only the
+native working state and arithmetic path differ. -/
+abbrev ModelDomain := FullyObservedDiagonalFilterAccuracy.ModelDomain
+
+/-- The same original dense initial words are used by both implementations. -/
+abbrev InitializationDomain := FullyObservedDiagonalFilterAccuracy.InitializationDomain
+
+/-- Uniform covariance-entry error allowance at every native prefix. -/
+def covarianceBudget : ℝ := (2 : ℝ) ^ (-30 : Int)
+
+/-- Uniform mean-component error allowance, including covariance/gain coupling. -/
+def meanBudget : ℝ := (2 : ℝ) ^ (-29 : Int)
+
+/-- Original dense initialization and time-varying original model bounds only.
+No reached profile, successful trace, or desired output error is assumed. -/
+structure HorizonDomain (initial : Input.State) (inputs : Nat → Input.Model)
+    (horizon : Nat)
+    : Prop where
+  initial_state : InitializationDomain initial
+  models : ∀ t, t < horizon → ModelDomain (inputs t)
+
+/-- Correctness-side composition of the existing checked native step. This
+definition specifies the repeated executable calls without duplicating or
+altering their arithmetic kernels. -/
+def josephRun (inputs : Nat → Input.Model) (initial : Input.State)
+    : Nat → Except Input.Error Input.State
+  | 0 => .ok initial
+  | t + 1 => do
+      let current ← josephRun inputs initial t
+      Kalman.Implementation.CovarianceFilter.step .joseph (inputs t) current
+
+/-- Every finite prefix of checked direct-Joseph filtering succeeds with
+uniform covariance/mean errors 2^-30/2^-29 against one independent Real trace
+from the original dense words. Both actual dense and ideal covariances are
+strictly positive definite. All stage profiles and native invariants follow
+from the original input domain, including unit/sign-reversing dynamics.
+Proof witness: `Kalman.Proofs.FloatJosephHorizon.initializedHorizonAccuracy`. -/
+def HorizonAccuracy : Prop :=
+  ∀ (initial : Input.State) (inputs : Nat → Input.Model) (horizon : Nat),
+    HorizonDomain initial inputs horizon
+    → ∀ t,
+        t ≤ horizon
+        → ∃ output,
+            josephRun inputs initial t = .ok output
+            ∧ StateInvariant output
+            ∧ StateWithin covarianceBudget meanBudget (state 2 output)
+                (exactRun 2 2 inputs (state 2 initial) t)
+            ∧ (matrix 2 2 output.covariance).PosDef
+            ∧ (exactRun 2 2 inputs (state 2 initial) t).covariance.PosDef
 
 end
 end Kalman.Implementation.Correctness.FullyObservedDiagonalJosephAccuracy

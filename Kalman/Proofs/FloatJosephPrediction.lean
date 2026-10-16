@@ -1,7 +1,6 @@
 import Kalman.Proofs.FloatJosephUpdate
 import Kalman.Proofs.FloatMeanDomain
 import Kalman.Proofs.RealObservableCorrection
-import Kalman.Implementation.Correctness.FullyObservedDiagonalFilterAccuracy
 
 /-! Dense native prediction from original model/state bounds, with every
 product and sum charged against the same decoded covariance and mean. -/
@@ -13,7 +12,6 @@ open Kalman.Definitions
 open Kalman.Implementation.LinearAlgebra
 open Kalman.Implementation.Correctness.InputInterpretation
 open Kalman.Implementation.Correctness.FullyObservedDiagonalJosephAccuracy
-open Kalman.Implementation.Correctness.FullyObservedDiagonalFilterAccuracy (ModelDomain)
 open Kalman.Definitions.Theorems.RecursionSensitivity
 open Kalman.Proofs.ArithmeticProfiles
 open Kalman.Proofs.ErrorPropagation

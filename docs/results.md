@@ -61,8 +61,9 @@ monotone absolute-error growth. Fixture words and equations are recorded in
 
 ## Complete filter guarantees
 
-The complete native theorems cover **the QR square-root implementation** under
-two original-input domains. Both use $n=m=2$, correctly shaped finite storage,
+Complete native certificates cover **QR on both domains below** and **direct
+Joseph on the fully observed diagonal domain**. All use $n=m=2$, correctly
+shaped finite storage,
 initial mean and every measurement bounded componentwise by one, and original
 initial/noise covariance diagonals in $[1,3/2]$. Models may vary with time.
 
@@ -77,36 +78,44 @@ covariance are diagonal, with $|F_{ii}|\le1$. This includes identity and
 near-identity/sign-reversing transitions. Every finite prefix succeeds and stays
 diagonal. The native initial variance interval is $[1,3/2]$; the separate Real
 invariant admits the wider interval $[1/2,3/2]$. See
-[the initialized observable horizon](#fully-observed-diagonal-accumulated-accuracy-from-original-inputs).
+[the initialized QR horizon](#fully-observed-diagonal-accumulated-accuracy-from-original-inputs)
+and [the direct Joseph horizon](#direct-joseph-accumulated-accuracy-from-original-inputs).
 
 Let $E_P$ bound every covariance-entry difference from $P_t$ and $E_x$ bound
 every mean-component difference from the independent ideal mean.
 
-| Domain | Retained-factor $E_P$ | Returned dense $E_P$ | $E_x$ | Returned dense floor |
+| Implementation/domain | Retained-factor $E_P$ | Returned dense $E_P$ | $E_x$ | Returned dense floor |
 | --- | --- | --- | --- | --- |
-| Correlated stable | $2^{-25}$ | $2^{-25}+2^{-48}$ | $2^{-25}$ | $1/4-2^{-47}>0$ |
-| Fully observed diagonal | $5\cdot 2^{-30}$ | $5\cdot 2^{-30}+2^{-48}$ | $2^{-24}$ | $7/16-2^{-47}\ge3/8$ |
+| QR: correlated stable | $2^{-25}$ | $2^{-25}+2^{-48}$ | $2^{-25}$ | $1/4-2^{-47}>0$ |
+| QR: fully observed diagonal | $5\cdot 2^{-30}$ | $5\cdot 2^{-30}+2^{-48}$ | $2^{-24}$ | $7/16-2^{-47}\ge3/8$ |
+| Direct Joseph: fully observed diagonal | n/a | $2^{-30}$ | $2^{-29}$ | $7/16>0$ |
 
 These bounds hold at **every prefix of any finite horizon**, including
 initialization, and do not grow with the number of steps. No reached arithmetic
 profile, successful trace, reference-state bound, or desired output error is an
 original-input premise. Higher-order and normal/subnormal terms are included.
 
-Returned dense output is finite, has exactly matching off-diagonal Float words,
-and copies mean words unchanged. Symmetry is proved without repair, and PD is
-derived from a quantitative retained floor and the materialization error.
+For QR, separately materialized dense output is finite, has matching
+off-diagonal Float words, and copies retained mean words unchanged. Its PD
+follows from a retained floor and materialization error. Direct Joseph stores
+dense covariance throughout; its off-diagonal entries decode exactly to zero
+(with either zero sign allowed), and PD follows directly from its native
+invariant floor. Neither implementation repairs symmetry. Different sufficient
+certificate budgets do not establish a general ordering of actual accuracy.
 The complete witnesses are `FloatInputHorizon.initialized_horizon_accuracy`,
 `FloatDenseHorizon.initialized_dense_horizon_accuracy`,
-`FloatObservableHorizon.initialized_horizon_accuracy`, and
-`FloatObservableDenseOutput.initialized_dense_horizon_accuracy`.
+`FloatObservableHorizon.initialized_horizon_accuracy`,
+`FloatObservableDenseOutput.initialized_dense_horizon_accuracy`, and
+`FloatJosephHorizon.initialized_horizon_accuracy`.
 
 ## Scope and trust
 
-Direct Joseph now has a complete checked-step accuracy result on the fully
-observed diagonal domain, including prediction, computed gain, and mean error,
-as well as broader covariance-kernel bounds at supplied stored gains. Its
-accumulated horizon remains separate work. Compact and subtractive have
-certified failure examples and shared arithmetic bounds.
+Direct Joseph and QR have complete original-input horizon certificates on the
+fully observed diagonal domain. QR additionally has the correlated stable
+domain above. Joseph's broader supplied-gain covariance-kernel bound is a
+separate local result. Compact and subtractive have certified failure examples
+and shared arithmetic bounds; no complete trajectory certificate is claimed
+for those formulations.
 
 General component theorems may use conditional profiles or successful runs;
 the original-input filter domains discharge all of their reached premises.
@@ -314,6 +323,7 @@ statement also charges gain formation and prediction.
 | `FloatJosephGain.gain_stages` | All native gain stages succeed; computed gain is finite and diagonal, has diagonal entries in $[3/8,13/16]$, and error at most $2^{-36}$ against original $P(P+R)^{-1}$ | Finite diagonal stored prior/noise, $H=I$, prior variances $[15/16,13/4]$, noise variances $[1,3/2]$; no intermediate execution or profile premise |
 | `FloatJosephUpdate.update_accuracy` | Complete computed-gain Joseph correction succeeds, restores the dense operating invariant, and has covariance/mean errors at most $2^{-33}$ against the exact optimal update of the same stored prior | Original two-state correction input bounds: prior variances $[15/16,13/4]$, prior mean magnitude $19/16$, noise variances $[1,3/2]$, $H=I$, measurement magnitude one; no intermediate run/profile premise |
 | `FloatJosephPrediction.prediction_accuracy` / `FloatJosephFilter.step_accuracy` | Native dense prediction has covariance/mean errors $2^{-42}/2^{-46}$ and reaches the correction domain; a complete checked step restores the invariant with both local errors at most $2^{-32}$ | Shared fully observed diagonal original model domain; incoming finite dense diagonal invariant with covariance entries $[7/16,13/8]$ and mean magnitude $9/8$ |
+| `FloatJosephHorizon.initialized_horizon_accuracy` | Every checked native prefix succeeds; uniform covariance/mean errors $2^{-30}/2^{-29}$ against one independent Real trace from original dense words; actual dense and exact covariances are PD | Original shared fully observed diagonal model/initialization domain; arbitrary finite horizons and time-varying models; no reached-profile, successful-run, reference-state, or output-error premise |
 | `FloatJosephStructure.stored_input_positive` | Rounded dense Joseph output is diagonal, finite, positive definite, has diagonal floor $1/8$, and retains the $2^{-34}$ evaluation bound | Stored-input domain above, $H=I$, decoded diagonal $P,R,K$, and prior/noise diagonal entries at least $1/2$; supplied gain may be nonoptimal |
 | `qrGramFactorInitialAccuracy` | Execution succeeds with finite lower-positive $L$; exact $LL^T\succeq(M^2/16)I$ is PD; $`\lvert(LL^T-AA^T)_{ij}\rvert\le G_{d,n}(M)\le M^2/128`$ | Original finite $n\times d$ array, $n\le d\le8$, $2^{-896}\le M\le2^{900}$, row energies $\le M^2/2$, $AA^T\succeq(M^2/8)I$; no run or intermediate profile assumption |
 | `factorMaterializationAccuracy` | Dense $LL^T$ formation error at most $n2^{-50}M$; checked output is valid | Valid retained factor, $1\le n\le32$, finite storage, Gram dot-product mass $\le M$, $2^{-1022}\le M\le2^{990}$ |
@@ -662,10 +672,10 @@ The result statement and domain are in
 `Implementation/Correctness/JosephCovarianceEvaluation.lean`; a nonzero-gain,
 nonzero-observation, correlated-prior witness proves the domain is inhabited.
 
-This is a completed stored-gain covariance-evaluation result, not a complete
-Joseph filter certificate. The complete computed-gain correction and its output invariant are discharged
-separately below; the complete checked step is discharged below. Accumulated independent-trajectory
-accuracy remains separate.
+This stored-gain kernel result is composed with the computed-gain, complete
+correction, checked-step, and accumulated-trajectory theorems below. Its wider
+supplied-gain operand domain is separate from the fully observed diagonal
+horizon domain.
 Sixty native cases compare against an independent exact-rational expanded
 Joseph polynomial in `Tests/JosephReference.py`; the `10^-14` regression
 tolerance is separate from the proved allowance. They include correlated
@@ -684,7 +694,6 @@ with its recursively defined budget. `nonexpansive_budget` proves the linear
 allowance $e_0+t\delta$ for $0\le L\le1$; no Kalman sensitivity constant is
 silently assumed.
 
-
 `FloatJosephSolve.factor_diagonal` and `solve_accuracy` discharge the actual
 LDLᵀ factorization and two substitution passes on diagonal coefficients in
 `[3/2,5]`, with finite RHS entries bounded by four. Output is finite, size four,
@@ -694,8 +703,8 @@ including signed zeros. The proof uses FLARE substitution row equations and
 error bounds, with a sharper project proof of the diagonal factorization; it
 avoids the generic factorization allowance. Ninety-six native boundary/interior
 solves additionally check original-system residuals and zero preservation.
-This is a completed solver-stage theorem; composing gain accuracy and the
-full Joseph horizon remains outstanding.
+This completed solver-stage theorem is consumed by the original-input gain
+and complete horizon results below.
 
 `FloatJosephGain.gain_stages` now derives the actual gain prefix from original
 stored operands: HP, HPHᵀ, noise addition, PHᵀ, copied transposed RHS, LDLᵀ solve,
@@ -710,7 +719,8 @@ The proof charges innovation rounding and RHS formation as well as the solve.
 Two hundred eighty-eight native corrections compare against exact-rational
 original-input ratios generated by `Tests/JosephGainReference.py`, including
 non-dyadic variances and signed zeros. This completes the gain prefix; the correction theorem below additionally
-charges mean/residual arithmetic. The full-filter horizon remains separate.
+charges mean/residual arithmetic. The horizon result below additionally
+propagates independent incoming-state error.
 
 `FloatJosephUpdate.update_accuracy` composes the entire native correction,
 including the actual gain computation, projected mean, residual, increment,
@@ -745,9 +755,6 @@ Sixteen checked prediction/full-step cases compare with the independent
 unit/sign-reversing dynamics, non-dyadic words, and signed zeros. Independent
 accumulated trajectory error is separate from this complete local-step theorem.
 
-
-
-
 `FloatJosephStructure.covariance_diagonal` covers diagonal preservation through
 all five products and both rounded sums. `stored_input_diagonal_accuracy`
 derives successful execution, accuracy, and diagonal output from stored inputs.
@@ -761,9 +768,51 @@ The prior-entry cap of four covers the reached prediction bound `13/4` used
 by the observable QR analysis. Sharper bounds on stored `W` (`7/2`) and exact
 `I-KH` (three) retain the same evaluation allowance on this wider domain.
 Seventy-two native cases exercise boundary variances, nonoptimal signed gains,
-and signed zeros. This local result does not yet establish the operating
-invariant or a full-filter horizon.
+and signed zeros. This supplied-gain kernel result is separate from the computed-gain operating
+invariant and complete horizon theorem.
 
+### Direct Joseph accumulated accuracy from original inputs
+
+`FloatJosephHorizon.initialized_horizon_accuracy` completes the native direct
+Joseph certificate from original dense initialization and original time-varying
+models alone. Its public `HorizonDomain` shares the QR `ModelDomain` and
+`InitializationDomain`: `n=m=2`, finite correct shapes, `H=I`, diagonal F/Q/R
+and initial covariance, `|F_ii|≤1`, initial/Q/R diagonal entries `[1,3/2]`, and
+initial mean/every measurement bounded by one. Identity, near-unit, and
+sign-reversing dynamics inhabit this domain at every finite horizon.
+
+The correctness-side `josephRun` composes the existing checked native
+`CovarianceFilter.step .joseph`; it duplicates no arithmetic algorithm. Every
+prefix returns finite storage and retains diagonal covariance entries
+`[7/16,13/8]` and mean magnitude at most `9/8`. The actual dense covariance is
+strictly positive definite without repair. The independent exact matrix trace
+`exactRun` starts from the original dense words and uses the same original
+model/measurement words; its invariant and PD proof do not depend on a native
+trace or assumed approximation error. Initialization copies the original
+native state, so both initial errors are zero.
+
+The checked local full-step errors `2^-32` compose with completed Real
+sensitivity, including the covariance-dependent gain change in the mean:
+
+$$E_{P,t+1}\le2^{-32}+\tfrac9{25}E_{P,t},\qquad
+E_{x,t+1}\le2^{-32}+\tfrac35E_{x,t}+\tfrac12E_{P,t}.$$
+
+`uniform_budget_caps` closes these coupled recurrences with
+`E_P=2^-30` and `E_x=2^-29` at every prefix, independent of horizon length.
+All reached arithmetic profiles, successful operations, guard checks, native
+storage conditions, and independent reference invariants are derived; none is
+an original-input premise. The public statement is
+`Implementation/Correctness/FullyObservedDiagonalJosephAccuracy.HorizonAccuracy`,
+with witness `FloatJosephHorizon.initializedHorizonAccuracy`.
+
+Two 256-step checked native trajectories use identity or near-unit/sign-reversing
+dynamics and time-varying original Q/R/measurements. Every prefix checks the
+native invariant, while seven checkpoints per trajectory compare against the
+independent exact-rational oracle `Tests/JosephHorizonReference.py`. Their
+`10^-12` regression tolerance is separate from the proved uniform allowances.
+These are sufficient certificates on the shared restricted domain; their
+constants do not prove general superiority over QR or cover arbitrary coupled
+navigation geometries.
 
 ### Retained factors and optional dense output
 

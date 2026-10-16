@@ -2,8 +2,8 @@
 
 A formal numerical-software case study connecting exact Kalman mathematics to
 executable binary64 arithmetic. The project certifies conventional numerical
-failures and proves square-root filter accuracy and covariance positivity on
-explicit operating domains. It uses **Lean and Mathlib 4.34.1** and
+failures and proves direct Joseph and QR square-root accuracy and covariance
+positivity on explicit operating domains. It uses **Lean and Mathlib 4.34.1** and
 [FLARE](https://github.com/duckki/flare-lean).
 
 ## Exact reference
@@ -44,18 +44,12 @@ mean equivalence are also proved. See [the sources and specification](docs/paper
   reference stays positive-definite.
 - **Subtractive:** Evaluates $P^- - K(HP^-)$ with a different rounding order.
   The same one-step negative-variance example is certified.
-- **Direct Joseph:** Evaluates the two congruence terms and adds them. Its
-  completed local covariance-evaluation bound compares with the exact Joseph
-  expression at the supplied stored gain. A two-state stored-input theorem
-  derives every covariance operation's success and entrywise error at most
-  $2^{-34}$ from explicit operand ranges, including full observation $H=I$.
-  On its fully observed diagonal subdomain with prior/noise variances at least
-  $1/2$, the rounded dense result has diagonal floor $1/8$ and is positive
-  definite, including for nonoptimal gains. The gain prefix also has an original-input
-  error bound $2^{-36}$ on the reached fully observed diagonal domain. Complete
-  correction covariance/mean errors are at most $2^{-33}$, with a restored dense
-  state invariant. Complete checked-step covariance/mean errors are at most
-  $2^{-32}$, including prediction. Accumulated horizon accuracy remains separate.
+- **Direct Joseph:** Evaluates the two congruence terms and adds them. On the
+  fully observed diagonal two-state domain, every checked native prefix succeeds
+  and retains positive-definite dense covariance. Uniform covariance/mean errors
+  are at most $2^{-30}$ / $2^{-29}$ against an independent original-input Real
+  trajectory. A broader local covariance-kernel certificate gives $2^{-34}$
+  error at supplied stored gains, including nonoptimal gains.
 - **QR square-root:** Stores a lower triangular covariance factor $L$ with
   positive diagonal, denoting covariance $LL^T$. It uses QR for prediction,
   innovation, and a factored Joseph correction, with triangular solves for the
@@ -66,37 +60,39 @@ form and U-D storage are part of the mathematical specification.
 
 ## Complete numerical guarantees
 
-The full certificate covers **two operating profiles of the same QR square-root
-implementation**, each with two states and two measurements. It compares with
-one independently propagated Real trajectory initialized from the original
-dense covariance and mean, using exactly the same finite input words.
+Complete certificates cover two operating profiles of the QR implementation
+and the fully observed diagonal profile of direct Joseph, each with two states
+and two measurements. Every comparison uses one independently propagated Real
+trajectory initialized from the original dense covariance and mean, interpreting
+exactly the same finite input words.
 
-**Correlated stable profile:** Transition entries satisfy $|F_{ij}|\le1/8$ and
+**QR correlated stable profile:** Transition entries satisfy $|F_{ij}|\le1/8$ and
 observation entries $|H_{ij}|\le1/64$, with bounded correlated covariances and
 measurements. At every finite prefix, the returned dense covariance has
 entrywise error at most $2^{-25}+2^{-48}$ and the mean has componentwise error
 at most $2^{-25}$, both below $3\times10^{-8}$.
 
 **Fully observed diagonal profile:** $H=I$ and diagonal transition magnitudes
-are at most one, including identity and near-identity dynamics, with bounded
-diagonal covariances and measurements. Returned dense covariance error is at
-most $5\cdot 2^{-30}+2^{-48}$, below $4.7\times10^{-9}$; mean error is at most
-$2^{-24}$, below $6\times10^{-8}$.
+are at most one, including identity, near-identity, and sign-reversing dynamics,
+with bounded diagonal covariances and measurements. QR returned dense covariance
+error is at most $5\cdot 2^{-30}+2^{-48}$ and mean error at most $2^{-24}$.
+Direct Joseph covariance error is at most $2^{-30}$ (below $9.4\times10^{-10}$)
+and mean error at most $2^{-29}$ (below $1.9\times10^{-9}$).
 
-In both profiles, initialization and every native step succeed. The bounds
-include accumulated rounding and do not grow with the horizon. The retained
-factor and separately rounded dense output both denote strictly positive-definite
-covariances; dense output is exactly symmetric without repair. These horizon
-guarantees apply to the QR implementation. Regression agreement between other
-implementations is separate from an accuracy proof.
+All stated bounds hold at every finite prefix and do not grow with the horizon.
+Original inputs derive successful execution and strict covariance positivity.
+QR certifies both its retained factor Gram and separately rounded dense output;
+Joseph certifies its actual stored dense covariance, with diagonal floor $7/16$.
+Different sufficient proof allowances do not establish a general accuracy
+ordering between formulations.
 
 [Results and numerical guarantees](docs/results.md) gives the complete original
 input domains, exact constants, positivity floors, and completed theorem interfaces.
 
 ## Contribution and scope
 
-The main contribution is a **formally checked numerical certificate for a
-specific implementation of a classical filter**. The exact identities,
+The project provides **formally checked numerical certificates for concrete
+implementations of classical filters**. The exact identities,
 positivity principles, and advantages of square-root filtering are established
 Kalman theory.
 
@@ -110,9 +106,9 @@ square-root formulation used here.
 ([Numerical analysis paper](https://perso.uclouvain.be/paul.vandooren/publications/VerhaegenV86.pdf),
 [QR algorithm paper](https://arxiv.org/pdf/2208.06452v1).)
 
-**What we certify:** We instantiate established roundoff analysis for this
-binary64 program and certify its concrete error bounds in Lean on two operating
-domains.
+**What we certify:** We instantiate established roundoff analysis for these
+native binary64 implementations and certify their concrete error bounds in
+Lean on explicit operating domains.
 
 ### Formal verification
 
@@ -132,9 +128,9 @@ a statistical approximation guarantee complementary to roundoff bounds. See
 [the prior-work review](docs/references/prior-formalizations.md) for the
 versioned sources, theorem locations, and trust scopes.
 
-**What this development adds:** A complete Lean proof connecting the executable
-QR filter to its Real specification, including accumulated accuracy and
-covariance positivity. Relative to the reviewed work, the added value is this
+**What this development adds:** Complete Lean proofs connecting executable QR
+and direct Joseph filters to their Real specifications, including accumulated
+accuracy and covariance positivity. Relative to the reviewed work, the added value is this
 implementation-specific binary64 certificate.
 
 The complete native filter domains are bounded two-state families. Wider

@@ -10,7 +10,6 @@ open Matrix hiding transpose
 open Kalman.Definitions
 open Kalman.Implementation.Correctness.InputInterpretation
 open Kalman.Implementation.Correctness.FullyObservedDiagonalJosephAccuracy
-open Kalman.Implementation.Correctness.FullyObservedDiagonalFilterAccuracy (ModelDomain)
 open Kalman.Definitions.Theorems.RecursionSensitivity
 
 set_option maxHeartbeats 1200000
