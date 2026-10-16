@@ -554,6 +554,56 @@ def constantVelocityPredictionChecks : IO Unit := do
           index := index + 1
   check (index == 36) "all coupled prediction cases exercised"
 
+def constantVelocityTrackingReference : Array (Array Float) :=
+  #[
+    #[0.125, -0.5, 0.5, 0.25, 0.25, 1],
+    #[2.9802322387695312e-08, -0.49999998509883881, 0.5, 0.25, 0.25, 1],
+    #[-0.062500013038516045, -0.46875000838190317, 0.5, 0.25, 0.25, 1],
+    #[-0.097900380082137417, -0.37487792465617531, 0.5, 0.25, 0.25, 1],
+    #[-0.070196799779131847, -0.20763056855947642, 0.5, 0.25, 0.25, 1],
+    #[-0.020217241714729672, -0.056401910996223312, 0.5, 0.25, 0.25, 1],
+    #[-0.0014409173861499721, -0.0040069358923877146, 0.5, 0.25, 0.25, 1],
+    #[1.0661852845765568e-08, 2.0161315555907713e-09, 0.5, 0.25, 0.25, 1],
+    #[1.0845859710035289e-08, 2.5278135023684733e-09, 0.5, 0.25, 0.25, 1],
+  ]
+
+def constantVelocityTrackingInput (t : Nat) : Model :=
+  let z :=
+    match t % 4 with
+    | 0 => 0.000000059604644775390625
+    | 1 => -0.000000059604644775390625
+    | 2 => 0.0
+    | _ => 0.0000000298023223876953125
+  ⟨2, 1, #[1.0, 0.25, 0.0, 1.0], #[1.0, 0.0], #[0.3125, 0.0, 0.0, 0.125], #[1.0], #[z]⟩
+
+def constantVelocityTrackingChecks : IO Unit := do
+  let covariance := #[0.5, 0.25, 0.25, 1.0]
+  let initial : State := ⟨#[0.125, -0.5], covariance⟩
+  let mut current := initial
+  let checkpoints := #[0, 1, 2, 4, 8, 16, 32, 128, 1024]
+  let mut index := 0
+  for t in [:1025] do
+    check (current.covariance.map Float.toBits == covariance.map Float.toBits)
+      "coupled correlated covariance exact at every prefix"
+    if index < checkpoints.size && t == checkpoints[index]! then
+      check
+        (close (current.mean ++ current.covariance)
+          constantVelocityTrackingReference[index]! 1.0e-12)
+        "independent original-input coupled tracking reference"
+      index := index + 1
+    if t < 1024 then
+      current ←
+        requireOk (SymmetricJosephFilter.step (constantVelocityTrackingInput t) current)
+          "coupled tracking step preserves the native operating domain"
+  check (index == checkpoints.size) "all coupled tracking reference prefixes exercised"
+  let driven ←
+    requireOk (SymmetricJosephFilter.run constantVelocityTrackingInput initial 1024)
+      "coupled tracking checked driver"
+  check
+    (driven.mean.map Float.toBits == current.mean.map Float.toBits
+      && driven.covariance.map Float.toBits == current.covariance.map Float.toBits)
+    "coupled tracking driver preserves exact retained words"
+
 def scalarChecks : IO Unit := do
   let input := scalar 1.0 1.0 1.0
   let initial : State := ⟨#[0.0], #[1.0]⟩
@@ -4066,6 +4116,7 @@ def run : IO Unit := do
   josephPositionCorrectionChecks
   josephSymmetryRepairChecks
   constantVelocityPredictionChecks
+  constantVelocityTrackingChecks
   josephCertifiedHorizonChecks
   negativeVarianceChecks
   repeatedNegativeChecks

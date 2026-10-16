@@ -1255,3 +1255,33 @@ claim domain closure merely from their existence. Thirty-six independent
 Fraction references cover three nonzero time increments, correlated priors,
 two process-noise scales and two initial means. As with the correction, the
 normalized bounds are sufficient project constants, not physical sensor units.
+
+### Closed coupled tracking envelope
+
+The first closed position-only tracking family fixes `dt = 1/4`,
+`Q = diag(5/16, 1/8)`, `R = 1`, and the correlated initial covariance
+`[[1/2, 1/4], [1/4, 1]]`. Exact prediction gives
+`[[1, 1/2], [1/2, 9/8]]`; correction has gain `[1/2, 1/4]` and returns the
+initial covariance. `Definitions/Theorems/ConstantVelocityTracking` records
+these project choices. `Proofs/ConstantVelocityTracking` proves this cycle from
+the source equations and proves weighted mean nonexpansiveness: position error
+radius `r` and velocity error radius `4*r` are preserved by an exact full step.
+
+`Proofs/FloatConstantVelocityStorage` proves exact original-word decoding and
+the same covariance/gain cycle through the actual binary64 dense kernels and
+scalar LDL solve, by kernel reduction. It introduces no native evaluation axiom.
+`FloatConstantVelocityTracking` combines these results with the general local
+prediction and mean-error proofs. The complete checked step succeeds from the
+original envelope and has weighted local mean radius `2^-36` and zero covariance
+error in this family. Prediction itself derives every premise of the existing
+correlated position-correction domain, including the prior `1/2` floor.
+
+With original measurements bounded by `2^-24`, the envelope
+`1/8 + t*(2^-25 + 2^-36)` is preserved up to `t = 2^20` and stays below `3/16`.
+Its stored posterior covariance has floor `1/4`; means and measurements may
+vary. The original envelope is proved nonempty. These are completed local and
+domain-preservation results. This is a stationary-covariance family, not a
+certificate for arbitrary correlated initial covariances or arbitrary sensor
+scales. A 1,024-step varying-measurement regression checks all covariance-word
+prefixes and nine independently propagated Fraction references. The original-
+input accumulated horizon comparison is a separate result.
