@@ -21,6 +21,9 @@ run_cmd do
           count := count + 1
       | _ => pure ()
   for required in #[``Kalman.Proofs.JosephPositionCorrection.covarianceFloor,
+      ``Kalman.Proofs.FloatSymmetricJosephCorrection.mirror_accuracy,
+      ``Kalman.Proofs.FloatSymmetricJosephCorrection.update_accuracy,
+      ``Kalman.Proofs.FloatSymmetricJosephCorrection.output_posDef,
       ``Kalman.Proofs.JosephPositionCorrection.symmetric_part_error,
       ``Kalman.Proofs.FloatJosephPositionArithmetic.scalar_solve,
       ``Kalman.Proofs.FloatJosephPositionGain.gain_stages,

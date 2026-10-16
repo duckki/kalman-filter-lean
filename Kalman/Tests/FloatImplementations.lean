@@ -1,4 +1,5 @@
 import Kalman.Implementation.CovarianceFilter
+import Kalman.Implementation.SymmetricJosephFilter
 import Kalman.Implementation.UncertaintyInflation
 import Kalman.Implementation.SquareRootFilter
 
@@ -417,8 +418,38 @@ def josephPositionCorrectionChecks : IO Unit := do
             let off := (output.covariance[1]! + output.covariance[2]!) / 2.0
             check (p00 > 0.0 && p11 > 0.0 && p00 * p11 - off * off > 0.0)
               "positive symmetric part without native repair"
+            let repaired ←
+              requireOk (SymmetricJosephFilter.update input prior)
+                "checked repaired position-only Joseph correction"
+            check (close (repaired.mean ++ repaired.covariance) expected 1.0e-12)
+              "repaired covariance original-word reference"
+            check
+              (repaired.mean.map Float.toBits == output.mean.map Float.toBits
+                && repaired.covariance.map Float.toBits
+                    == #[p00, output.covariance[2]!, output.covariance[2]!, p11].map
+                        Float.toBits)
+              "repair copies lower words and preserves mean and diagonal words"
+            check (p00 * p11 - repaired.covariance[1]! * repaired.covariance[2]! > 0.0)
+              "positive repaired stored covariance"
             index := index + 1
   check (index == 72) "all position-only Joseph references exercised"
+
+def josephSymmetryRepairChecks : IO Unit := do
+  let raw : State := ⟨#[-0.0, 0.25], #[1.0, 0.75, -0.0, 2.0]⟩
+  let repaired := SymmetricJosephFilter.mirrorCovariance 2 raw
+  check
+    (repaired.mean.map Float.toBits == raw.mean.map Float.toBits
+      && repaired.covariance.map Float.toBits == #[1.0, -0.0, -0.0, 2.0].map Float.toBits)
+    "lower triangle is authoritative, including signed-zero words"
+  let input : Model := ⟨2, 1, identity 2, #[1.0, 0.0], identity 2, #[1.0], #[0.0]⟩
+  let malformed := { raw with covariance := #[1.0] }
+  match SymmetricJosephFilter.update input malformed with
+  | .error .invalidShape => pure ()
+  | _ => throw (IO.userError "repair wrapper must propagate shape rejection")
+  let indefinite := { raw with covariance := #[-2.0, 0.0, 0.0, 1.0] }
+  match SymmetricJosephFilter.update input indefinite with
+  | .error .nonpositivePivot => pure ()
+  | _ => throw (IO.userError "repair wrapper must propagate innovation rejection")
 
 def scalarChecks : IO Unit := do
   let input := scalar 1.0 1.0 1.0
@@ -3930,6 +3961,7 @@ def run : IO Unit := do
   josephCompleteStepChecks
   uncertaintyInflationChecks
   josephPositionCorrectionChecks
+  josephSymmetryRepairChecks
   josephCertifiedHorizonChecks
   negativeVarianceChecks
   repeatedNegativeChecks

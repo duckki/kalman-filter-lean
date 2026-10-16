@@ -1211,3 +1211,27 @@ The output's exact symmetric part has a certified floor, while raw output
 asymmetry is bounded separately. This interpretation does not claim exact
 stored symmetry. The theorem is local, with explicit conditioning/scale bounds;
 no physically calibrated sensor or prediction/horizon extension is implied.
+
+### Optional stored symmetry for the position-only Joseph correction
+
+`Implementation/SymmetricJosephFilter.update` is an opt-in wrapper around the
+checked Joseph correction. After successful correction it copies lower-triangle
+covariance words to the upper triangle using the pinned FLARE `mirrorLower`
+kernel. It performs no additional arithmetic, preserves all mean and diagonal
+words, and propagates correction errors. This project storage choice is separate
+from the attributed Joseph equations and leaves the original runtime unchanged.
+
+`Proofs/FloatSymmetricJosephCorrection.mirror_accuracy` lifts FLARE's
+`MatrixFormation.mirrorLower_accuracy` to state comparisons in any dimension.
+Against a Hermitian exact reference it preserves both componentwise radii.
+`update_accuracy` instantiates the complete original-input correlated-prior
+correction theorem: mean/covariance errors remain `2^-28`, and the repaired
+stored covariance is Hermitian with floor `1/8`, hence positive definite.
+The positivity proof pays for entrywise error from the exact Joseph `1/4`
+floor; it does not treat mirroring as a general positivity repair.
+
+All 72 independent original-word position-correction references also exercise
+the wrapper. Regressions check exact copied words, signed zero, positive stored
+determinants, shape rejection and nonpositive-innovation rejection. This result
+remains a local correction certificate; coupled prediction and domain closure
+require separate results.
